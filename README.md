@@ -42,7 +42,7 @@ O ScriptNive 1.5.9 oferece um menu com diversas opções para corrigir problemas
 
 Gostaria de testar o ScriptNive na sua forma .exe? Clique no botão abaixo Para que você possa fazer download Da versão executada.
 
-[![Teste Agora](https://github.com/seu-usuario/seu-repositorio/assets/exemplo-de-imagem)]([https://link-para-o-script](https://www.mediafire.com/file/0yvzhddkx5taorn/Instalador_ScriptNive_1.5.9.exe/file#))
+[![Teste Agora](https://github.com/RIZONCIO/Script-Nive/assets/61835786/b1b2fa6b-9ba4-4381-95e5-a3fd8096d75e)](https://www.mediafire.com/file/0yvzhddkx5taorn/Instalador_ScriptNive_1.5.9.exe/file#)
 
 ## Agradecimentos
 
