@@ -1,5 +1,8 @@
 <h1 align="center"> ScriptNive 1.5.9 </h1>
 
+[![GPLv3 License](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![7DaysOfCode](https://img.shields.io/badge/7DaysOfCode-Challenge-green)](https://7daysofcode.io/matricula/html-css)
+
 ## Bem-vindo ao ScriptNive 1.5.9!
 
 O ScriptNive é um script desenvolvido em batch para fornecer soluções rápidas e eficazes para a maioria dos erros comuns encontrados em sistemas Windows. Criado por **Ryan Vinicius Carvalho Pereira**, este script utiliza apenas funções nativas do Windows, não requerendo a instalação de programas adicionais.
