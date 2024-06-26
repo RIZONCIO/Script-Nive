@@ -1,7 +1,7 @@
 <h1 align="center"> ScriptNive 1.5.9 </h1>
 
-[![GPLv3 License](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
-[![7DaysOfCode](https://img.shields.io/badge/7DaysOfCode-Challenge-green)](https://7daysofcode.io/matricula/html-css)
+[![GPLv3 License](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://github.com/RIZONCIO/Script-Nive?tab=GPL-3.0-1-ov-file)
+[![1YearofProject](https://img.shields.io/badge/1YearofProjec-CreationTime-Yellow)](https://github.com/RIZONCIO/Script-Nive)
 
 ## Bem-vindo ao ScriptNive 1.5.9!
 
