@@ -1,19 +1,29 @@
-<h1 align="center"> ScriptNive 1.5.9 </h1>
+<h1 align="center"> ScriptNive 1.6.0 </h1>
 
 [![GPLv3 License](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://github.com/RIZONCIO/Script-Nive?tab=GPL-3.0-1-ov-file)
 [![1YearofProject](https://img.shields.io/badge/1YearofProjec-CreationTime-Yellow)](https://github.com/RIZONCIO/Script-Nive)
 
-## Bem-vindo ao ScriptNive 1.5.9!
+## Bem-vindo ao ScriptNive 1.6.0!
 
 O ScriptNive é um script desenvolvido em batch para fornecer soluções rápidas e eficazes para a maioria dos erros comuns encontrados em sistemas Windows. Criado por **Ryan Vinicius Carvalho Pereira**, este script utiliza apenas funções nativas do Windows, não requerendo a instalação de programas adicionais.
 
 ## Sobre o Projeto
 
-O ScriptNive 1.5.9 oferece um menu com diversas opções para corrigir problemas em sistemas Windows 7 e versões posteriores. Este projeto foi desenvolvido com o intuito de ajudar usuários a resolver problemas básicos de forma rápida e eficiente.
+O ScriptNive 1.6.0 oferece um menu com diversas opções para corrigir problemas em sistemas Windows 7 e versões posteriores. Este projeto foi desenvolvido com o intuito de ajudar usuários a resolver problemas básicos de forma rápida e eficiente.
 
 ### Funcionalidades
 
-![Menu Inicial Do Script](https://github.com/RIZONCIO/Script-Nive/assets/61835786/45115a1a-4a80-4d04-b11a-9f6240b29093)
+![Menu Inicial Do Script](https://github.com/RIZONCIO/Script-Nive/assets/61835786/c9381390-553a-4ed0-9ee0-ec238f6cd633)
+
+- **Crédito Do ScriptNive**: Abrirá um PDF com Todas as funções e explicações técnicas sobre como usar o ScriptNive independente da sua versão.
+
+- **Informações gerais do Computador**: Executará no CMD , Várias linhas de código Mostrando todas as configurações de hardware do seu computador,Te dando a possibilidade de consultar sobre os seu hardware.
+
+- **Crédito Do ScriptNive**: Levará você Para um outro menu do scriptnive informando sobre quem é o criador do Script , Quais sites ele usou para poder criar 'ferramentas' e que ajudou no projeto.
+
+- **Verificar diagnóstico de erro**: Inicia o "Monitor de Confiabilidade no Windows", Que vai estar exibindo um diagnóstico de erros no seu sistema operacional.
+
+### MENU TAREFAS
 
 - **Esvaziar a Lixeira**: Executa um comando que limpa a lixeira do sistema.
 
@@ -41,16 +51,10 @@ O ScriptNive 1.5.9 oferece um menu com diversas opções para corrigir problemas
 2. **Evitar execuções excessivas:** Não execute os comandos de forma excessiva para evitar possíveis problemas futuros no sistema.
 3. **Segurança dos comandos:** Todos os comandos utilizados são certificados pela Microsoft e seguros para resolver problemas básicos de forma eficiente.
 
-## Teste o ScriptNive!
-
-Gostaria de testar o ScriptNive na sua forma .exe? Clique no botão abaixo Para que você possa fazer download Da versão executada.
-
-[![Teste Agora](https://github.com/RIZONCIO/Script-Nive/assets/61835786/b1b2fa6b-9ba4-4381-95e5-a3fd8096d75e)](https://www.mediafire.com/file/0yvzhddkx5taorn/Instalador_ScriptNive_1.5.9.exe/file#)
-
 ## Agradecimentos
 
 Este projeto foi desenvolvido por **Ryan Vinicius Carvalho Pereira**. Agradeço por explorar o ScriptNive e espero que você encontre soluções rápidas e eficazes para os problemas do seu sistema Windows.
 
 Se você gostou do projeto ou tem alguma sugestão, sinta-se à vontade para contribuir ou entrar em contato.
 
-Obrigado por visitar o ScriptNive 1.5.9!
+Obrigado por visitar o ScriptNive 1.6.0!
