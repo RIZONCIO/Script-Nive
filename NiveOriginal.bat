@@ -5,18 +5,17 @@
 REM change CHCP to UTF-8
 CHCP 65001
 CLS
-title ScriptNive 1.5.9
+title ScriptNive 1.6.0
 color 9
 echo ===================================
 echo *   0-Entra      1-Sair           *
 echo ===================================
 set /p opcao= Desejo abrir o ScriptNive :
-echo ------------------------------
+REM echo ------------------------------
 if %opcao% equ 0 goto opcao0
 if %opcao% equ 1 goto opcao1
 
 :opcao0
-"C:\Program Files (x86)\Nive\ScriptMus.vbs"
 cls
 goto menu
 
@@ -30,7 +29,7 @@ cls
 cls
 color 9
 
-echo Bem Vindo o ScriptNive 1.5.9
+echo Bem Vindo o ScriptNive 1.6.0
 
 echo                  _________-----_____
 echo        ____------           __      ----_
@@ -50,38 +49,44 @@ echo                                   \             (
 echo                                    \_____________)
 
 
-date /t      
+date /t     
 time /t 
 
 echo Computador: %computername%        Usuario: %username%
 
-echo ====================================
-echo *  ?.Informação Sobre ScriptNive   *
-echo *  C. Crédito Do ScriptNive        *
-echo *  E.Verificar diagnóstico de erro *
-echo ====================================
+echo ==========================================
+echo *  S.Informação Sobre ScriptNive         *
+echo *  I.Informações gerais do Computador    * 
+echo *  C.Crédito Do ScriptNive               *
+echo *  E.Verificar diagnóstico de erro       *
+echo ==========================================
                    
 echo            MENU TAREFAS
-echo ==========================================
+echo =========================================
 echo * 1. Esvaziar a Lixeira                  *
-echo * 2. Verifica Erro e Correção No HD      *
-echo * 3. Reparador De Sistema                *
-echo * 4. Limpar HD/Limpar Temp               *
-echo * 5. Limpar o cache DNS                  *
-echo * 6. Painel de Controle                  *
-echo * 7. Iniciar o MRT                       *
-echo * 8. Atualizador de Programas            *
-echo * 9. Reparo completo do Windows          *
-echo * 10. Sair                               *
+echo * 2. Solucionar erros no HD/SSD          *
+echo * 3. Verificar Erros na RAM              *
+echo * 4. Reparador Do Sistema                *
+echo * 5. Otimizar Windows                    *
+echo * 6. Limpar o cache DNS                  *
+echo * 7. Painel de Controle                  *
+echo * 8. Iniciar o MRT                       *
+echo * 9. Atualizador de Programas            *
+echo * 10. Resolvendo Problemas de Som        *
+echo * 11. Reparo completo do Windows         *
+echo * 12. Sair                               *
 echo ==========================================
 
 set /p opcao= Escolha uma opcao: 
 echo ------------------------------
 if %opcao% equ C goto opcaoC 
 if %opcao% equ c goto opcaoc
+if %opcao% equ I goto opcaoI
+if %opcao% equ i goto opcaoi
 if %opcao% equ E goto opcaoE
 if %opcao% equ e goto opcaoe
-if %opcao% equ ? goto opcao?
+if %opcao% equ S goto opcaoS
+if %opcao% equ s goto opcaos
 if %opcao% equ 1 goto opcao1
 if %opcao% equ 2 goto opcao2
 if %opcao% equ 3 goto opcao3
@@ -92,10 +97,16 @@ if %opcao% equ 7 goto opcao7
 if %opcao% equ 8 goto opcao8
 if %opcao% equ 9 goto opcao9
 if %opcao% equ 10 goto opcao10
+if %opcao% equ 11 goto opcao11
 
-:opcao?
+:opcaoS :opcaos
 cls
-"C:\Program Files (x86)\Nive\Documentação-Técnica-do-ScriptNive-1.5.9.pdf"
+"C:\Program Files (x86)\Nive\Documentação-Técnica-do-ScriptNive.pdf"
+goto menu
+
+:opcaoI :opcaoi
+cls
+start INFPC.bat
 goto menu
 
 :opcaoC :opcaoc
@@ -118,7 +129,8 @@ goto menu
 
 :opcao2
 cls
-CHKDSK /R & Dism /Online /Cleanup-Image /ScanHealth & Dism /Online /Cleanup-Image /RestoreHealth & shutdown -r -t 30 
+WMIC diskdrive get status & WMIC diskdrive get model,status
+CHKDSK /R & shutdown -r -t 30 
 echo ===================================
 echo *   Verificado com Sucesso        *
 echo *   Erros do HD Corrigidas        *
@@ -128,54 +140,73 @@ goto menu
 
 :opcao3
 cls
-sfc /scannow
+mdsched
 pause
-goto menu
+goto menu 
 
 :opcao4
 cls
-start cleanmgr.exe & del /q/f/s %Temp% & del /q/f/s "C:\Windows\Temp"
-echo ==================================
-echo *      Temp Limpo com sucesso  *  
-echo *      HD  Limpo com sucesso   *
-echo ==================================
+sfc /scannow &  Dism /Online /Cleanup-Image /ScanHealth & Dism /Online /Cleanup-Image /RestoreHealth & shutdown -r -t 30 
 pause
 goto menu
 
 :opcao5
+cls
+start cleanmgr.exe & del /q /f /s "%temp%\*" & del /q/f/s "C:\Windows\Temp\*" & del /q /f /s "%windir%\Prefetch\*" & del /q /f /s "%appdata%\Microsoft\Windows\Recent\*" & powercfg.exe /hibernate off
+echo ==================================
+echo *      Temp Limpo com sucesso  *  
+echo *      HD  Limpo com sucesso   *
+echo *      Desativar a hibernação  * 
+echo ==================================
+pause
+goto menu
+
+:opcao6
 cls
 netsh winsock reset
 netsh int ip reset
 ipconfig /release 
 ipconfig /renew 
 ipconfig /flushdns 
+ipconfig /registerdns
 pause
 goto menu
 
-:opcao6
+:opcao7
 cls
 control.exe
 pause
 goto menu
 
-:opcao7
+:opcao8
 cls  
 powershell.exe -command "& {Start-Process 'C:\Windows\System32\MRT.exe' -Wait}"
 pause
 goto menu 
 
-:opcao8
+:opcao9
 cls
 winget upgrade & winget upgrade --all
 pause
 goto menu
 
-:opcao9
+:opcao10
+CLS
+echo Reiniciando o Serviço de Áudio...
+net stop audiosrv & timeout /t 5 & net start audiosrv
+
+echo Verificando o Status dos Serviços de Áudio...
+for %%S in (audiosrv AudioEndpointBuilder wuauserv) do net start %%S
+
+echo Processo Concluído. Verifique se os problemas de áudio foram resolvidos.
+pause
+
+:opcao11
 cls
 "C:\Program Files (x86)\Nive\Reparo completo do Windows\.bat" 
 goto menu
 
-:opcao10
+:opcao12
 cls
 exit
 
