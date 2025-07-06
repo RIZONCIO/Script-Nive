@@ -1,4 +1,4 @@
-<h1 align="center"> ScriptNive 1.6.2 </h1>
+<h1 align="center"> ScriptNive 1.6.8 </h1>
 
 [![GPLv3 License](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://github.com/RIZONCIO/Script-Nive?tab=GPL-3.0-1-ov-file)
 [![1YearofProject](https://img.shields.io/badge/1YearofProjec-CreationTime-Yellow)](https://github.com/RIZONCIO/Script-Nive)
@@ -9,11 +9,12 @@ O **ScriptNive** é um script desenvolvido em batch, criado para fornecer soluç
 
 ## Sobre o Projeto
 
-O ScriptNive 1.6.2 oferece um menu com diversas opções para corrigir problemas em sistemas Windows 7 e versões posteriores. Este projeto foi desenvolvido com o intuito de ajudar usuários a resolver problemas básicos de forma rápida e eficiente.
+O ScriptNive 1.6.8 oferece um menu com diversas opções para corrigir problemas em sistemas Windows 7 e versões posteriores. Este projeto foi desenvolvido com o intuito de ajudar usuários a resolver problemas básicos de forma rápida e eficiente.
 
 ### Funcionalidades
 
-![Menu Inicial Do Script](https://github.com/user-attachments/assets/51141f34-685e-4bba-a2c0-9b33df53fdec)
+![Menu Inicial Do Script](https://github.com/user-attachments/assets/5a2ef80a-9756-41c5-a732-8fbaa0b39d3a)
+
 
 - **Informação Sobre ScriptNive**: Abrirá este PDF com todas as funções e explicações técnicas sobre como usar o ScriptNive e NiveBoost independentemente da sua versão.
 
@@ -44,11 +45,17 @@ O ScriptNive 1.6.2 oferece um menu com diversas opções para corrigir problemas
 
 **Painel de Controle**: Abre o Painel de Controle do Windows, permitindo a personalização das configurações do sistema. Nota: Utilize esta função apenas se tiver conhecimento técnico adequado.
 
+**Gerenciador de Tarefas**: Abre o Gerenciador de Tarefas do Windows, permite monitorar o consumo de algum softwares também pode estar finalizando tarefas do software. Nota: Utilize esta função apenas se tiver conhecimento técnico adequado.
+
 **Iniciar o MRT**: Inicia a Ferramenta de Remoção de Software Malicioso (MRT) da Microsoft, que atua como um antivírus básico. Nota: Esta ferramenta não substitui um antivírus completo.
 
 **Atualizador de Programas**: Faz uma varredura completa no seu computador por buscas de programas desatualizados e logo em seguida atualiza todos os programas.
 
 **Resolvendo Problemas de Som**: Executa uma linha de comandos com a função de recuperar ou solucionar problemas na conexão de áudio tanto na entrada quanto da saída.
+
+**Reinstalar Software Problemático**: Executa um Power Shell que utiliza o [Chocolatey](https://github.com/chocolatey/choco) que é um gerenciador de pacotes para Windows que simplifica a instalação, atualização e gerenciamento de softwares.
+
+**Deletar Pastas Corrompidas**: Executa uma sequência de comandos em cadeia para excluir pastas fantasmas ou pastas que estão sendo bloqueadas por algum tipo de bug.Nota: Verifique com cuidado qual pasta você quer deletar.
 
 **Reparo Completo do Windows**: Executa uma sequência de comandos para reparo completo do sistema, incluindo reparos de HD/SSD e integridade do sistema operacional.
 
