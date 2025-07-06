@@ -1,7 +1,7 @@
 @ECHO OFF
 :: NOME   : NiveBoost
 :: AUTOR  : Ryan Vinicius Carvalho Pereira
-:: VERSAO : Enterprise Release Slim / Básica
+:: VERSAO : Enterprise Release Slim / Completo
 REM change CHCP to UTF-8
 @echo off
 CHCP 65001
@@ -41,7 +41,7 @@ echo ==========================================
 echo                         MENU OTIMIZADOR
 echo ================================================================
 echo * 1. Desabilitar Alguns Serviços Do Windows.                   *
-echo * 2. Desabilitar Tweaks De Tarefas Agendadas.                  *
+echo * 2. Desabilitar Tweaks De Tarefas Agendadas.                  * 
 echo * 3. Desabilitar Alguns Softwares do Windows.                  * 
 echo * 4. Remover Telemetria e Coleta de Dados.                     *
 echo * 5. Remover Features Não Usadas.                              *
@@ -80,7 +80,7 @@ if %opcao% equ 13 goto opcao13
 
 :opcaoN :opcaon
 cls
-"C:\Program Files (x86)\Nive\Documentação-Técnica-do-NiveBoost.pdf"
+"C:\Program Files (x86)\Nive\Documentação-Técnica-do-ScriptNive.pdf"
 goto menu
 
 :opcaoC :opcaoc
@@ -111,7 +111,7 @@ echo OBS: Essas funções são irreversíveis a não ser que tenha criado um pon
 set /p resposta=Deseja realmente continuar? (s/n): 
 if /i "%resposta%"=="s" (
     echo Continuando...
-    start "C:\Program Files (x86)\Nive\Otimizadores\DesabilitarAlgunsServiços.bat"
+    start "C:\Program Files (x86)\Nive\Otimizadores\DesabilitarAlgunsServiços.bat" 
 ) else (
     echo Cancelando.
     goto menu

@@ -1,17 +1,17 @@
 @ECHO OFF
 :: NOME   :  ScriptNive
 :: AUTOR  : Ryan Vinicius Carvalho Pereira
-:: VERSAO : Enterprise Release Slim / Básica
+:: VERSAO : Enterprise Release Slim / Completa
 REM change CHCP to UTF-8
 @echo off
 CHCP 65001
-title ScriptNive 1.6.2
+title ScriptNive 1.6.8
 cls
 :menu
 cls
 color 9
 
-echo Bem Vindo o ScriptNive 1.6.2
+echo Bem Vindo o ScriptNive 1.6.8
 
 echo                  _________-----_____
 echo        ____------           __      ----_
@@ -48,17 +48,20 @@ echo            MENU TAREFAS
 echo =========================================
 echo * 1. Esvaziar a Lixeira                  *
 echo * 2. Ativar GodMode no PC                *
-echo * 3. Solucionar erros no HD/SSD          *
+echo * 3. Solucionar Erros no HD/SSD          *
 echo * 4. Verificar Erros na RAM              *
 echo * 5. Reparador Do Sistema                *
 echo * 6. Limpar Arquivos Temporários e HD    *
-echo * 7. Limpar o cache DNS                  *
+echo * 7. Limpar o Cache DNS                  *
 echo * 8. Painel de Controle                  *
-echo * 9. Iniciar o MRT                       *
-echo * 10. Atualizador de Programas           *
-echo * 11. Resolvendo Problemas de Som        *
-echo * 12. Reparo completo do Windows         *
-echo * 13. Sair                               *
+echo * 9. Gerenciador de Tarefas              * 
+echo * 10. Iniciar o MRT                      *
+echo * 11. Atualizador de Programas           *
+echo * 12. Resolvendo Problemas de Som        *
+echo * 13. Reinstalar Software Problemático   *
+echo * 14. Deletar Pastas Corrompidas         *
+echo * 15. Reparo Completo do Windows         *
+echo * 16. Sair                               *
 echo ==========================================
 
 set /p opcao= Escolha uma opcao: 
@@ -86,10 +89,13 @@ if %opcao% equ 10 goto opcao10
 if %opcao% equ 11 goto opcao11
 if %opcao% equ 12 goto opcao12
 if %opcao% equ 13 goto opcao13
+if %opcao% equ 14 goto opcao14
+if %opcao% equ 15 goto opcao15
+if %opcao% equ 16 goto opcao16
 
 :opcaoS :opcaos
 cls
-"C:\Program Files (x86)\Nive\Documentação-Técnica-do-ScriptNive.pdf"
+start "" "C:\Program Files (x86)\Nive\Documentação-Técnica-do-ScriptNive.pdf" 
 goto menu
 
 :opcaoI :opcaoi
@@ -107,7 +113,7 @@ goto menu
 
 :opcaoO :opcaoo
 cls 
-"C:\Program Files (x86)\Nive\NiveBoost.bat" || start NiveBoost.bat 
+"C:\Program Files (x86)\Nive\NiveBoost.bat" || start "" NiveBoost.bat 
 exit
 goto menu
 
@@ -177,22 +183,27 @@ goto menu
 :opcao8
 cls
 control.exe
-pause
 goto menu
 
 :opcao9
-cls  
-powershell.exe -command "& {Start-Process 'C:\Windows\System32\MRT.exe' -Wait}"
-pause
-goto menu 
+cls
+taskmgr.exe 
+goto menu
 
 :opcao10
+cls
+echo Iniciando verificação do MRT...
+powershell.exe -command "Start-Process 'C:\Windows\System32\MRT.exe'"
+timeout /t 2 >nul
+goto menu
+
+:opcao11
 cls
 winget upgrade & winget upgrade --all
 pause
 goto menu
 
-:opcao11
+:opcao12
 CLS
 echo Reiniciando o Serviço de Áudio...
 net stop audiosrv & timeout /t 5 & net start audiosrv
@@ -204,12 +215,111 @@ echo Processo Concluído. Verifique se os problemas de áudio foram resolvidos.
 pause
 goto menu
 
-:opcao12
+:opcao13
+cls
+echo -------------------------------
+echo  Reinstalar Software com Problema
+echo -------------------------------
+
+set "script1=Opcao13.ps1"
+set "script2=C:\Program Files (x86)\Nive\Opcao13.ps1"
+
+:: Verifica se o arquivo está no local atual
+if exist "%script1%" (
+    start "" powershell -ExecutionPolicy Bypass -NoProfile -File "%script1%"
+) else if exist "%script2%" (
+    start "" powershell -ExecutionPolicy Bypass -NoProfile -File "%script2%"
+) else (
+    echo.
+    echo [ERRO] Script Opcao13.ps1 nao encontrado.
+    pause
+)
+goto menu
+
+:opcao14
+cls
+echo.
+echo ==========================================
+echo      DELETAR PASTA CORROMPIDA (FORÇADO)
+echo ==========================================
+echo.
+
+set /p pasta=Digite o caminho COMPLETO da pasta que deseja deletar: 
+
+if not "%pasta:~0,1%"=="\"" set "pasta=%pasta%"
+set "pasta=%pasta:"=%"  :: Remove aspas duplas redundantes
+
+if not exist "%pasta%" (
+    echo.
+    echo [ERRO] Caminho nao encontrado: "%pasta%"
+    pause
+    goto menu
+)
+
+echo.
+echo Removendo atributos de protecao...
+attrib -R -S -H "%pasta%" /S /D >nul 2>&1
+
+echo.
+echo Tomando posse da pasta...
+takeown /f "%pasta%" /r /d y >nul 2>&1
+
+echo.
+echo Garantindo permissoes administrativas...
+icacls "%pasta%" /grant administrators:F /t >nul 2>&1
+
+echo.
+echo Tentando apagar a pasta normalmente...
+rd /s /q "%pasta%" >nul 2>&1
+
+start explorer.exe >nul 2>&1
+
+if exist "%pasta%" (
+    echo.
+    echo [AVISO] Pasta ainda existe... Iniciando modo ZUMBI!
+    
+    echo.
+    echo Criando pasta temporária para forçar exclusao...
+    md "%temp%\vazio" >nul 2>&1
+
+    echo.
+    echo Sobrescrevendo e sincronizando com pasta vazia...
+    robocopy "%temp%\vazio" "%pasta%" /MIR >nul
+
+    echo.
+    echo Tentando apagar a pasta zumbi...
+    rd /s /q "%pasta%" >nul 2>&1
+
+    rd "%temp%\vazio" /s /q >nul 2>&1
+
+    if exist "%pasta%" (
+        echo.
+        echo [FALHA] Ainda nao foi possivel excluir a pasta.
+        echo Tente reiniciar o PC em modo de seguranca e usar esta opcao novamente.
+    ) else (
+        echo.
+        echo [SUCESSO] Pasta zumbi deletada com sucesso!
+    )
+
+) else (
+    echo.
+    echo [SUCESSO] Pasta excluída com sucesso!
+)
+
+echo.
+set /p repetir=Deseja deletar outra pasta? (s/n): 
+if /i "%repetir%"=="s" (
+    goto :opcao14
+) else (
+    goto menu
+)
+
+:opcao15
 cls
 "C:\Program Files (x86)\Nive\Reparo completo do Windows\.bat" 
 goto menu
 
-:opcao13
+:opcao16
 cls
 exit
 
