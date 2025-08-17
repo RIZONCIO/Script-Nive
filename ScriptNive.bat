@@ -100,7 +100,7 @@ goto menu
 
 :opcaoI :opcaoi
 cls
-start INFPC.bat
+"C:\Program Files (x86)\Nive\INFPC.bat" || start INFPC.bat
 goto menu
 
 :opcaoC :opcaoc
