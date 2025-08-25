@@ -1,0 +1,31 @@
+[17:36:54] [INFO] ScriptNive GUI iniciado
+[17:38:18] [INFO] Monitor de Confiabilidade aberto com sucesso
+[17:38:18] [INFO] Monitor de Confiabilidade (perfmon /rel) executado
+[17:38:25] [INFO] Gerenciador de Tarefas aberto
+[17:38:32] [INFO] Aplicação fechada pelo usuário
+[18:19:42] [INFO] ScriptNive GUI iniciado
+[18:20:14] [INFO] Remoção de telemetria: 1 sucessos, 13 erros
+[18:20:18] [INFO] Erro crítico na desabilitação de softwares: 'ProgressLogger' object has no attribute 'info'
+[18:20:20] [INFO] Aplicação fechada pelo usuário
+[18:22:29] [INFO] ScriptNive GUI iniciado
+[18:23:27] [INFO] Remoção de telemetria: 1 sucessos, 13 erros
+[18:23:28] [INFO] Erro crítico na desabilitação de softwares: 'ProgressLogger' object has no attribute 'info'
+[18:26:37] [INFO] Remoção de telemetria: 1 sucessos, 13 erros
+[18:26:39] [INFO] Erro crítico na desabilitação de softwares: 'ProgressLogger' object has no attribute 'info'
+[18:35:45] [INFO] Remoção de telemetria: 1 sucessos, 13 erros
+[18:36:04] [INFO] Erro crítico na desabilitação de softwares: 'ProgressLogger' object has no attribute 'info'
+[18:36:05] [INFO] Aplicação fechada pelo usuário
+[18:41:55] [INFO] ScriptNive GUI iniciado
+[18:42:21] [INFO] Remoção de telemetria: 1 sucessos, 13 erros
+[18:42:27] [INFO] Erro crítico na desabilitação de softwares: 'ProgressLogger' object has no attribute 'info'
+[18:43:50] [INFO] Aplicação fechada pelo usuário
+[18:52:13] [INFO] ScriptNive GUI iniciado
+[19:01:09] [INFO] ScriptNive GUI iniciado
+[19:15:31] [INFO] Remoção de telemetria: 1 sucessos, 13 erros
+[19:15:32] [INFO] Erro crítico na desabilitação de softwares: 'ProgressLogger' object has no attribute 'info'
+[19:15:33] [INFO] Aplicação fechada pelo usuário
+[19:16:23] [INFO] ScriptNive GUI iniciado
+[19:21:43] [INFO] Aplicação fechada pelo usuário
+[19:29:14] [INFO] ScriptNive GUI iniciado
+[19:29:38] [INFO] Desabilitação de softwares: 8 sucessos, 1 erros
+[19:29:41] [INFO] Aplicação fechada pelo usuário
