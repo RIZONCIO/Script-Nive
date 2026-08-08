@@ -115,7 +115,7 @@ Caso seja necessário pode me contatar , Através Das minhas redes sociais.
 
 ## Agradecimentos
 
-Este projeto foi desenvolvido por **Ryan Vinicius Carvalho Pereira**. Agradeço por explorar o ScriptNive e espero que você encontre soluções rápidas e eficazes para os problemas do seu sistema Windows.
+Este projeto foi desenvolvido por **RIZONCIO**. Agradeço por explorar o ScriptNive e espero que você encontre soluções rápidas e eficazes para os problemas do seu sistema Windows.
 
 Se você gostou do projeto ou tem alguma sugestão, sinta-se à vontade para contribuir ou entrar em contato.
 
