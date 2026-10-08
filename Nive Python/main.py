@@ -1,106 +1,164 @@
-import tkinter as tk
+"""
+main.py - Ponto de entrada modernizado do ScriptNive
+"""
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# CRÍTICO: as fontes Font Awesome DEVEM ser carregadas no GDI do Windows
+# ANTES de qualquer import do customtkinter, pois o CTk inicializa o
+# subsistema de fontes do tkinter no momento do import.
+# ═══════════════════════════════════════════════════════════════════════════════
+import sys
+import ctypes
+from pathlib import Path
+
+
+def _preload_fonts():
+    if sys.platform != "win32":
+        return
+
+    root_dir = Path(__file__).resolve().parent
+
+    fonts_dir = root_dir / "assets" / "font"
+    if not fonts_dir.exists():
+        fonts_dir = root_dir / "assets" / "fonts"
+
+    if not fonts_dir.exists():
+        print(
+            f"[preload] AVISO: pasta de fontes não encontrada em {root_dir / 'assets'}"
+        )
+        return
+
+    FA_FILES = [
+        "fa-solid-900.ttf",
+        "fa-regular-400.ttf",
+        "fa-brands-400.ttf",
+    ]
+
+    for fname in FA_FILES:
+        fpath = fonts_dir / fname
+        if fpath.exists():
+            result = ctypes.windll.gdi32.AddFontResourceExW(str(fpath), 0, 0)
+            if result:
+                print(f"[preload] ✓ {fname}")
+            else:
+                print(f"[preload] ✗ Falha: {fname}")
+        else:
+            print(f"[preload] ✗ Não encontrado: {fpath}")
+
+
+_preload_fonts()
+
+import customtkinter as ctk
 from tkinter import messagebox
-import ttkbootstrap as ttk_bs
 from interface import ScriptNiveInterface
 from core.system_commands import SystemCommands
 from utils.logger import Logger
 from utils.config import Config
+from utils.tray_icon import TrayIconManager
+from utils import icons
+
+ctk.set_appearance_mode("dark")
+ctk.set_default_color_theme("blue")
 
 
 class ScriptNiveGUI:
-    """Classe principal da aplicação ScriptNive GUI"""
+    """Aplicação principal ScriptNive GUI — versão modernizada."""
 
     def __init__(self):
-        """Inicializar aplicação"""
         try:
-            # Carregar configurações
+            icons.load_all()
             self.config = Config()
-
-            # Configurar logger
             self.logger = Logger()
-
-            # Inicializar comandos do sistema
             self.system_commands = SystemCommands(self.logger)
 
-            # Criar janela principal
-            self.root = ttk_bs.Window(themename=self.config.theme)
-            self.setup_window()
+            self.root = ctk.CTk()
+            self._setup_window()
 
-            # Criar interface
             self.interface = ScriptNiveInterface(
                 self.root, self.system_commands, self.logger, self.config
             )
 
-            # Configurar eventos de fechamento
-            self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
+            self.tray_manager = TrayIconManager(
+                self.root, self._restore_window, self._exit_from_tray
+            )
+            self.root.protocol("WM_DELETE_WINDOW", self._on_closing)
 
         except Exception as e:
-            messagebox.showerror(
-                "Erro de Inicialização", f"Erro ao inicializar aplicação:\n{str(e)}"
-            )
+            messagebox.showerror("Erro de Inicialização", f"Erro ao inicializar:\n{e}")
             raise
 
-    def setup_window(self):
-        """Configurar janela principal"""
-        self.root.title(f"ScriptNive {self.config.version} - Interface Gráfica")
-        self.root.geometry(f"{self.config.window_width}x{self.config.window_height}")
+    def _setup_window(self):
+        w = getattr(self.config, "window_width", 1050)
+        h = getattr(self.config, "window_height", 700)
+        self.root.title(
+            f"ScriptNive {getattr(self.config, 'version', '2.0')} — Interface Gráfica"
+        )
+        self.root.geometry(f"{w}x{h}")
         self.root.resizable(True, True)
-
-        # Centralizar janela
-        self.center_window()
-
-        # Configurar ícone (se disponível)
+        self.root.minsize(820, 540)
+        self._center_window(w, h)
+        try:
+            self.root.state("zoomed")
+        except Exception:
+            pass
         try:
             self.root.iconbitmap(self.config.icon_path)
-        except:
+        except Exception:
             pass
 
-    def center_window(self):
-        """Centralizar janela na tela"""
+    def _center_window(self, w, h):
         self.root.update_idletasks()
-        width = self.root.winfo_width()
-        height = self.root.winfo_height()
-        x = (self.root.winfo_screenwidth() // 2) - (width // 2)
-        y = (self.root.winfo_screenheight() // 2) - (height // 2)
-        self.root.geometry(f"{width}x{height}+{x}+{y}")
+        x = (self.root.winfo_screenwidth() // 2) - (w // 2)
+        y = (self.root.winfo_screenheight() // 2) - (h // 2)
+        self.root.geometry(f"{w}x{h}+{x}+{y}")
 
-    def on_closing(self):
-        """Manipular fechamento da aplicação"""
+    def _on_closing(self):
         try:
-            self.logger.log("Aplicação fechada pelo usuário")
-            self.root.destroy()
-        except:
+            self.logger.log_info("Aplicação minimizada para bandeja")
+            if hasattr(self, "interface"):
+                self.interface.update_status("Minimizado para bandeja")
+        except Exception:
             pass
+        self.root.withdraw()
+        self.tray_manager.start()
+
+    def _restore_window(self):
+        try:
+            self.root.deiconify()
+            self.root.lift()
+            self.tray_manager.stop()
+            self.logger.log_info("Aplicação restaurada da bandeja")
+            if hasattr(self, "interface"):
+                self.interface.update_status("Restaurado")
+        except Exception:
+            pass
+
+    def _exit_from_tray(self):
+        try:
+            self.tray_manager.stop()
+        except Exception:
+            pass
+        try:
+            self.logger.log_info("Aplicação encerrada pelo usuário")
+        except Exception:
+            pass
+        self.root.destroy()
 
     def run(self):
-        """Executar aplicação"""
-        try:
-            self.logger.log("ScriptNive GUI iniciado")
-            self.root.mainloop()
-        except Exception as e:
-            self.logger.log(f"Erro durante execução: {str(e)}")
-            messagebox.showerror("Erro", f"Erro durante execução:\n{str(e)}")
+        self.logger.log("ScriptNive GUI iniciado")
+        self.root.mainloop()
 
 
 def main():
-    """Função principal"""
     try:
-        app = ScriptNiveGUI()
-        app.run()
+        ScriptNiveGUI().run()
     except ImportError as e:
-        if "ttkbootstrap" in str(e):
-            messagebox.showerror(
-                "Erro de Dependência",
-                "ttkbootstrap não está instalado.\n\nPara instalar:\npip install ttkbootstrap",
-            )
-        else:
-            messagebox.showerror(
-                "Erro de Dependência", f"Dependência não encontrada:\n{str(e)}"
-            )
-    except Exception as e:
         messagebox.showerror(
-            "Erro Crítico", f"Erro crítico ao iniciar aplicação:\n{str(e)}"
+            "Dependência não encontrada",
+            f"Instale com:\npip install customtkinter\n\nDetalhe: {e}",
         )
+    except Exception as e:
+        messagebox.showerror("Erro Crítico", f"Erro ao iniciar:\n{e}")
 
 
 if __name__ == "__main__":

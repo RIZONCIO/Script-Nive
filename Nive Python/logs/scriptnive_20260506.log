@@ -1,0 +1,122 @@
+[19:30:38] [INFO] Aplicação fechada pelo usuário
+[19:30:45] [INFO] ScriptNive GUI iniciado
+[19:37:05] [INFO] ScriptNive GUI iniciado
+[19:37:15] [INFO] Aplicação fechada pelo usuário
+[19:37:51] [INFO] ScriptNive GUI iniciado
+[19:38:28] [INFO] Aplicação fechada pelo usuário
+[19:38:34] [INFO] ScriptNive GUI iniciado
+[19:38:47] [SUCCESS] ✅ IP renovado com sucesso
+[19:39:00] [INFO] Aplicação fechada pelo usuário
+[19:39:06] [INFO] ScriptNive GUI iniciado
+[19:40:53] [INFO] Executando comando: rd /S /Q c:\$Recycle.bin
+[19:40:56] [ERROR] ❌ Erro no comando. Código: 5
+[19:40:56] [ERROR] ❌ Stderr: c:\$Recycle.bin\S-1-5-18 - Acesso negado.
+c:\$Recycle.bin\S-1-5-~1\$RMFQEYI\One\authtoken.secret - Acesso negado.
+c:\$Recycle.bin\S-1-5-~1\$RMFQEYI\One\CONTRO~1.D\network - Acesso negado.
+c:\$Recycle.bin\S-1-5-~1\$RMFQEYI\One\CONTRO~1.D\trace - Acesso negado.
+c:\$Recycle.bin\S-1-5-~1\$RMFQEYI\One\CONTRO~1.D - Acesso negado.
+c:\$Recycle.bin\S-1-5-~1\$RMFQEYI\One\identity.public - Acesso negado.
+c:\$Recycle.bin\S-1-5-~1\$RMFQEYI\One\identity.secret - Acesso negado.
+c:\$Recycle.bin\S-1-5-~1\$RMFQEYI\One\metrics.prom - Acesso negado.
+c:\$Recycle.bin\S-1-5-~1\$RMFQEYI\One\metricstoken.secret - Acesso negado.
+c:\$Recycle.bin\S-1-5-~1\$RMFQEYI\One\networks.d\632ea29085e0006a.conf - Acesso negado.
+c:\$Recycle.bin\S-1-5-~1\$RMFQEYI\One\networks.d\632ea29085e0006a.local.conf - Acesso negado.
+c:\$Recycle.bin\S-1-5-~1\$RMFQEYI\One\networks.d - Acesso negado.
+c:\$Recycle.bin\S-1-5-~1\$RMFQEYI\One\peers.d\0c88bdc2d8.peer - Acesso negado.
+c:\$Recycle.bin\S-1-5-~1\$RMFQEYI\One\peers.d\632ea29085.peer - Acesso negado.
+c:\$Recycle.bin\S-1-5-~1\$RMFQEYI\One\peers.d\778cde7190.peer - Acesso negado.
+c:\$Recycle.bin\S-1-5-~1\$RMFQEYI\One\peers.d\cafe04eba9.peer - Acesso negado.
+c:\$Recycle.bin\S-1-5-~1\$RMFQEYI\One\peers.d\cafe80ed74.peer - Acesso negado.
+c:\$Recycle.bin\S-1-5-~1\$RMFQEYI\One\peers.d\cafe9ccda7.peer - Acesso negado.
+c:\$Recycle.bin\S-1-5-~1\$RMFQEYI\One\peers.d\cafe9efeb9.peer - Acesso negado.
+c:\$Recycle.bin\S-1-5-~1\$RMFQEYI\One\peers.d\d5e5fb6537.peer - Acesso negado.
+c:\$Recycle.bin\S-1-5-~1\$RMFQEYI\One\peers.d - Acesso negado.
+c:\$Recycle.bin\S-1-5-~1\$RMFQEYI\One\planet - Acesso negado.
+c:\$Recycle.bin\S-1-5-~1\$RMFQEYI\One\zerotier-one.port - Acesso negado.
+c:\$Recycle.bin\S-1-5-~1\$RMFQEYI\One - Acesso negado.
+Acesso negado.
+
+[19:40:56] [ERROR] ❌ Erro ao esvaziar lixeira
+[19:41:07] [INFO] Executando comando: rd /S /Q c:\$Recycle.bin
+[19:41:07] [ERROR] ❌ Erro no comando. Código: 5
+[19:41:07] [ERROR] ❌ Stderr: c:\$Recycle.bin\S-1-5-18 - Acesso negado.
+c:\$Recycle.bin\S-1-5-~1\$RMFQEYI\One\authtoken.secret - Acesso negado.
+c:\$Recycle.bin\S-1-5-~1\$RMFQEYI\One\CONTRO~1.D\network - Acesso negado.
+c:\$Recycle.bin\S-1-5-~1\$RMFQEYI\One\CONTRO~1.D\trace - Acesso negado.
+c:\$Recycle.bin\S-1-5-~1\$RMFQEYI\One\CONTRO~1.D - Acesso negado.
+c:\$Recycle.bin\S-1-5-~1\$RMFQEYI\One\identity.public - Acesso negado.
+c:\$Recycle.bin\S-1-5-~1\$RMFQEYI\One\identity.secret - Acesso negado.
+c:\$Recycle.bin\S-1-5-~1\$RMFQEYI\One\metrics.prom - Acesso negado.
+c:\$Recycle.bin\S-1-5-~1\$RMFQEYI\One\metricstoken.secret - Acesso negado.
+c:\$Recycle.bin\S-1-5-~1\$RMFQEYI\One\networks.d\632ea29085e0006a.conf - Acesso negado.
+c:\$Recycle.bin\S-1-5-~1\$RMFQEYI\One\networks.d\632ea29085e0006a.local.conf - Acesso negado.
+c:\$Recycle.bin\S-1-5-~1\$RMFQEYI\One\networks.d - Acesso negado.
+c:\$Recycle.bin\S-1-5-~1\$RMFQEYI\One\peers.d\0c88bdc2d8.peer - Acesso negado.
+c:\$Recycle.bin\S-1-5-~1\$RMFQEYI\One\peers.d\632ea29085.peer - Acesso negado.
+c:\$Recycle.bin\S-1-5-~1\$RMFQEYI\One\peers.d\778cde7190.peer - Acesso negado.
+c:\$Recycle.bin\S-1-5-~1\$RMFQEYI\One\peers.d\cafe04eba9.peer - Acesso negado.
+c:\$Recycle.bin\S-1-5-~1\$RMFQEYI\One\peers.d\cafe80ed74.peer - Acesso negado.
+c:\$Recycle.bin\S-1-5-~1\$RMFQEYI\One\peers.d\cafe9ccda7.peer - Acesso negado.
+c:\$Recycle.bin\S-1-5-~1\$RMFQEYI\One\peers.d\cafe9efeb9.peer - Acesso negado.
+c:\$Recycle.bin\S-1-5-~1\$RMFQEYI\One\peers.d\d5e5fb6537.peer - Acesso negado.
+c:\$Recycle.bin\S-1-5-~1\$RMFQEYI\One\peers.d - Acesso negado.
+c:\$Recycle.bin\S-1-5-~1\$RMFQEYI\One\planet - Acesso negado.
+c:\$Recycle.bin\S-1-5-~1\$RMFQEYI\One\zerotier-one.port - Acesso negado.
+c:\$Recycle.bin\S-1-5-~1\$RMFQEYI\One - Acesso negado.
+Acesso negado.
+
+[19:41:07] [ERROR] ❌ Erro ao esvaziar lixeira
+[19:41:25] [INFO] Aplicação fechada pelo usuário
+[19:41:44] [INFO] ScriptNive GUI iniciado
+[19:59:21] [INFO] ScriptNive GUI iniciado
+[19:59:45] [SUCCESS] ✅ Documentação PDF aberta
+[19:59:45] [SUCCESS] ✅ Ação executada: 📄  Documentação (PDF)
+[20:00:23] [INFO] ℹ Aplicação minimizada para bandeja
+[20:00:28] [INFO] Aplicação fechada pelo usuário
+[20:01:05] [INFO] ScriptNive GUI iniciado
+[20:01:09] [INFO] Executando comando: powershell -NoProfile -Command "try { Clear-RecycleBin -Force -ErrorAction Stop } catch { Write-Error $_.Exception.Message; exit 1 }"
+[20:01:10] [ERROR] ❌ Erro no comando. Código: 1
+[20:01:10] [ERROR] ❌ Stderr: try { Clear-RecycleBin -Force -ErrorAction Stop } catch { Write-Error $_.Exception.Message; exit 1 } : O sistema nÆo pode encontrar o arquivo especificado
+    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorException
+    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException
+ 
+
+[20:01:10] [ERROR] ❌ Erro ao esvaziar lixeira
+[20:01:10] [INFO] Detalhe do erro na lixeira: try { Clear-RecycleBin -Force -ErrorAction Stop } catch { Write-Error $_.Exception.Message; exit 1 } : O sistema nÆo pode encontrar o arquivo especificado
+    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorException
+    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException
+ 
+
+[20:01:19] [INFO] ℹ Aplicação minimizada para bandeja
+[20:03:18] [INFO] ℹ Aplicação encerrada pelo usuário
+[20:03:21] [INFO] ℹ Aplicação encerrada pelo usuário
+[20:04:18] [INFO] ScriptNive GUI iniciado
+[20:05:32] [INFO] ℹ Aplicação minimizada para bandeja
+[20:05:45] [INFO] ScriptNive GUI iniciado
+[20:05:51] [INFO] ℹ Aplicação minimizada para bandeja
+[20:06:08] [INFO] ℹ Aplicação encerrada pelo usuário
+[20:06:10] [INFO] ℹ Aplicação encerrada pelo usuário
+[20:06:14] [INFO] ScriptNive GUI iniciado
+[20:08:10] [INFO] ScriptNive GUI iniciado
+[20:08:20] [INFO] ℹ Aplicação minimizada para bandeja
+[20:08:36] [INFO] ℹ Aplicação restaurada da bandeja
+[20:08:57] [SUCCESS] ✅ GodMode criado na Área de Trabalho
+[20:09:56] [INFO] ℹ Aplicação minimizada para bandeja
+[20:12:08] [INFO] ScriptNive GUI iniciado
+[20:15:19] [INFO] ℹ Aplicação minimizada para bandeja
+[20:39:31] [INFO] ℹ Aplicação encerrada pelo usuário
+[20:39:38] [INFO] ScriptNive GUI iniciado
+[20:40:28] [INFO] ℹ Aplicação minimizada para bandeja
+[20:40:32] [INFO] ℹ Aplicação encerrada pelo usuário
+[20:40:39] [INFO] ScriptNive GUI iniciado
+[20:40:48] [INFO] ℹ Aplicação minimizada para bandeja
+[20:41:56] [INFO] ℹ Aplicação encerrada pelo usuário
+[20:42:02] [INFO] ScriptNive GUI iniciado
+[20:42:10] [INFO] ℹ Aplicação minimizada para bandeja
+[20:42:14] [INFO] ℹ Aplicação encerrada pelo usuário
+[20:43:06] [INFO] ScriptNive GUI iniciado
+[20:43:30] [INFO] ℹ Aplicação minimizada para bandeja
+[20:43:39] [INFO] ℹ Aplicação encerrada pelo usuário
+[20:43:44] [INFO] ScriptNive GUI iniciado
+[20:44:04] [INFO] ℹ Aplicação minimizada para bandeja
+[20:44:07] [INFO] ℹ Aplicação encerrada pelo usuário

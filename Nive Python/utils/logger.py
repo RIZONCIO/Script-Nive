@@ -2,6 +2,7 @@ import os
 import tkinter as tk
 from datetime import datetime
 from pathlib import Path
+from utils.notifications import Notifications
 
 
 class Logger:
@@ -10,6 +11,7 @@ class Logger:
     def __init__(self, log_widget=None):
         """Inicializar logger"""
         self.log_widget = log_widget
+        self.notifications = Notifications()
         self.log_file = (
             Path("logs") / f"scriptnive_{datetime.now().strftime('%Y%m%d')}.log"
         )
@@ -49,12 +51,14 @@ class Logger:
             print(f"Erro ao salvar log: {e}")
 
     def log_success(self, message):
-        """Log de sucesso"""
+        """Log de sucesso com notificação"""
         self.log(f"✅ {message}", "SUCCESS")
+        self.notifications.show_notification("ScriptNive - Sucesso", message)
 
     def log_error(self, message):
-        """Log de erro"""
+        """Log de erro com notificação"""
         self.log(f"❌ {message}", "ERROR")
+        self.notifications.show_notification("ScriptNive - Erro", message)
 
     def log_warning(self, message):
         """Log de aviso"""

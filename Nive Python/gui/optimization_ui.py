@@ -1,246 +1,328 @@
-# gui/optimization_ui.py - Interface de usuário para otimização
+"""
+optimization_ui.py - Interface de otimização com ícones Font Awesome
+"""
 
-import tkinter as tk
-import ttkbootstrap as ttk_bs
-from ttkbootstrap.constants import *
+import customtkinter as ctk
+from utils import icons as ic
+
+COLORS = {
+    "content_bg": "#1e1e2e",
+    "card_bg": "#252537",
+    "card_hover": "#2e2e45",
+    "accent": "#4f9cf9",
+    "text_primary": "#e2e8f0",
+    "text_muted": "#8892a4",
+    "success": "#22c55e",
+    "warning": "#f59e0b",
+    "danger": "#ef4444",
+    "info": "#3b82f6",
+    "purple": "#a855f7",
+}
+
+STYLE_COLORS = {
+    "warning": COLORS["warning"],
+    "danger": COLORS["danger"],
+    "info": COLORS["info"],
+    "success": COLORS["success"],
+    "primary": COLORS["accent"],
+}
+
+
+def _darken(hex_color: str, factor: float = 0.75) -> str:
+    h = hex_color.lstrip("#")
+    r, g, b = int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16)
+    return f"#{int(r*factor):02x}{int(g*factor):02x}{int(b*factor):02x}"
 
 
 class OptimizationUI:
-    """Classe responsável pela interface de usuário da aba de otimização"""
-
     def __init__(self, optimization_tab):
-        """Inicializar UI da otimização"""
         self.parent = optimization_tab
 
     def create_optimization_tab(self, notebook):
-        """Criar aba de otimização com todas as 11 opções do NiveBoost"""
-        optimization_tab = ttk_bs.Frame(notebook)
-        notebook.add(
-            optimization_tab, text=f"{self.parent.config.get_icon('zap')} Otimização"
+        page = ctk.CTkScrollableFrame(
+            notebook,
+            fg_color=COLORS["content_bg"],
+            scrollbar_fg_color=COLORS["content_bg"],
+            scrollbar_button_color="#2d2d44",
+            corner_radius=0,
         )
 
-        # Container principal com scroll
-        main_container = ttk_bs.Frame(optimization_tab)
-        main_container.pack(fill=BOTH, expand=True)
+        container = ctk.CTkFrame(page, fg_color="transparent")
+        container.pack(fill="both", expand=True, padx=24, pady=16)
 
-        # Canvas e scrollbar para scroll vertical
-        canvas = tk.Canvas(main_container)
-        scrollbar = ttk_bs.Scrollbar(
-            main_container, orient="vertical", command=canvas.yview
-        )
-        scrollable_frame = ttk_bs.Frame(canvas)
-
-        scrollable_frame.bind(
-            "<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
-        )
-
-        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
-        canvas.configure(yscrollcommand=scrollbar.set)
-
-        canvas.pack(side="left", fill="both", expand=True)
-        scrollbar.pack(side="right", fill="y")
-
-        # Container de conteúdo
-        container = ttk_bs.Frame(scrollable_frame, padding=20)
-        container.pack(fill=BOTH, expand=True)
-
-        # Título da seção
-        title_label = ttk_bs.Label(
+        # Título
+        ctk.CTkLabel(
             container,
-            text="NiveBoost - Ferramentas de Otimização",
-            font=("Arial", 18, "bold"),
-            bootstyle="primary",
-        )
-        title_label.pack(pady=(0, 10))
-
-        # Versão
-        version_label = ttk_bs.Label(
+            text="NiveBoost — Ferramentas de Otimização",
+            font=ctk.CTkFont(family="Segoe UI", size=22, weight="bold"),
+            text_color=COLORS["accent"],
+        ).pack(pady=(0, 4))
+        ctk.CTkLabel(
             container,
             text="Versão 1.1.0",
-            font=("Arial", 12),
-            bootstyle="secondary",
-        )
-        version_label.pack(pady=(0, 20))
+            font=ctk.CTkFont(size=12),
+            text_color=COLORS["text_muted"],
+        ).pack(pady=(0, 16))
 
-        # Menu Principal de Otimização
-        optimization_frame = ttk_bs.LabelFrame(
-            container, text="Menu de Otimização", padding=15
-        )
-        optimization_frame.pack(fill=BOTH, expand=True, pady=(0, 20))
-
-        # Criar botões de otimização
-        self._create_optimization_buttons(optimization_frame)
-
-        # Aviso importante
+        self._section(container, "Menu de Otimização")
+        self._create_optimization_buttons(container)
         self._create_warning_section(container)
 
-        return optimization_tab
+        return page
 
-    def _create_optimization_buttons(self, parent_frame):
-        """Criar botões de otimização"""
-        # Lista das 11 opções de otimização do NiveBoost
-        optimization_options = [
+    def _section(self, parent, text):
+        f = ctk.CTkFrame(parent, fg_color="transparent")
+        f.pack(fill="x", pady=(0, 6))
+        ctk.CTkLabel(
+            f,
+            text=text,
+            font=ctk.CTkFont(family="Segoe UI", size=14, weight="bold"),
+            text_color=COLORS["text_primary"],
+        ).pack(side="left")
+        ctk.CTkFrame(f, height=2, fg_color="#3d3d5c", corner_radius=1).pack(
+            side="left", fill="x", expand=True, padx=(10, 0), pady=10
+        )
+
+    def _create_optimization_buttons(self, parent):
+        # (icon_key, texto, command, style, descrição)
+        OPTIONS = [
             (
-                "🔧 Desabilitar Alguns Serviços do Windows",
+                "wrench",
+                "Desabilitar Alguns Serviços do Windows",
                 self.parent.disable_windows_services,
                 "warning",
                 "Desabilita serviços desnecessários para melhorar performance",
             ),
             (
-                "📅 Desabilitar Tweaks de Tarefas Agendadas",
+                "calendar",
+                "Desabilitar Tweaks de Tarefas Agendadas",
                 self.parent.disable_scheduled_tasks,
                 "warning",
                 "Remove tarefas agendadas que consomem recursos",
             ),
             (
-                "💾 Desabilitar Alguns Softwares do Windows",
+                "box",
+                "Desabilitar Alguns Softwares do Windows",
                 self.parent.disable_windows_software,
                 "warning",
                 "Desabilita aplicativos e recursos desnecessários",
             ),
             (
-                "🕵️ Remover Telemetria e Coleta de Dados",
+                "user_secret",
+                "Remover Telemetria e Coleta de Dados",
                 self.parent.remove_telemetry,
                 "danger",
                 "Remove sistemas de coleta de dados e telemetria",
             ),
             (
-                "🗑️ Remover Features Não Usadas",
+                "trash",
+                "Remover Features Não Usadas",
                 self.parent.remove_unused_features,
                 "warning",
                 "Remove recursos e funcionalidades não utilizadas",
             ),
             (
-                "🎨 Remover Animações Inúteis",
+                "paintbrush",
+                "Remover Animações Inúteis",
                 self.parent.remove_animations,
                 "info",
                 "Remove animações para melhorar a responsividade",
             ),
             (
-                "🔍 Desabilitar Busca Web na Barra de Pesquisa",
+                "search",
+                "Desabilitar Busca Web na Barra",
                 self.parent.disable_web_search,
                 "info",
                 "Desabilita busca online na barra de pesquisa do Windows",
             ),
             (
-                "🌐 Desabilitar Cache de Navegadores e Streaming",
+                "globe",
+                "Desabilitar Cache de Navegadores",
                 self.parent.disable_browser_cache,
                 "warning",
                 "Otimiza cache de navegadores e serviços de streaming",
             ),
             (
-                "🔒 Desabilitar Propagandas na Tela de Bloqueio",
+                "lock",
+                "Desabilitar Propagandas na Tela Bloqueio",
                 self.parent.disable_lock_screen_ads,
                 "success",
                 "Remove propagandas e sugestões da tela de bloqueio",
             ),
             (
-                "🌍 Otimizar o Edge",
+                "network",
+                "Otimizar o Edge",
                 self.parent.optimize_edge,
                 "primary",
                 "Aplica otimizações específicas para o Microsoft Edge",
             ),
             (
-                "⚡Acelerar Windows",
+                "bolt",
+                "Acelerar Windows",
                 self.parent.accelerate_windows,
                 "success",
                 "Aplicação geral de otimizações para acelerar o sistema",
             ),
         ]
 
-        # Criar botões em lista vertical
-        for i, (text, command, style, description) in enumerate(optimization_options):
-            # Frame para cada opção
-            option_frame = ttk_bs.Frame(parent_frame)
-            option_frame.pack(fill=X, pady=5)
+        for icon_key, text, command, style, description in OPTIONS:
+            color = STYLE_COLORS.get(style, COLORS["accent"])
 
-            # Botão principal
-            btn = ttk_bs.Button(
-                option_frame, text=text, command=command, bootstyle=style, width=45
+            row = ctk.CTkFrame(
+                parent,
+                fg_color=COLORS["card_bg"],
+                corner_radius=10,
+                border_width=1,
+                border_color="#2d2d44",
             )
-            btn.pack(side=LEFT, padx=(0, 10))
+            row.pack(fill="x", pady=4)
+
+            # Botão com ícone FA
+            btn_frame = ctk.CTkFrame(
+                row, fg_color=color, corner_radius=8, height=36, width=340
+            )
+            btn_frame.pack_propagate(False)
+            btn_frame.pack(side="left", padx=12, pady=10)
+
+            inner = ctk.CTkFrame(btn_frame, fg_color="transparent")
+            inner.place(relx=0.5, rely=0.5, anchor="center")
+
+            ico_lbl = ctk.CTkLabel(
+                inner,
+                text=ic.get(icon_key),
+                font=ctk.CTkFont(
+                    family=ic.family(icon_key), size=13, weight=ic.weight(icon_key)
+                ),
+                text_color="#ffffff",
+            )
+            ico_lbl.pack(side="left")
+
+            txt_lbl = ctk.CTkLabel(
+                inner,
+                text=f"  {text}",
+                font=ctk.CTkFont(size=12, weight="bold"),
+                text_color="#ffffff",
+            )
+            txt_lbl.pack(side="left")
+
+            # Hover & clique
+            hover_color = _darken(color)
+            for w in (btn_frame, inner, ico_lbl, txt_lbl):
+                w.bind(
+                    "<Enter>",
+                    lambda e, f=btn_frame, hc=hover_color: f.configure(fg_color=hc),
+                )
+                w.bind(
+                    "<Leave>", lambda e, f=btn_frame, nc=color: f.configure(fg_color=nc)
+                )
+                w.bind("<Button-1>", lambda e, cmd=command: cmd())
 
             # Descrição
-            desc_label = ttk_bs.Label(
-                option_frame,
+            ctk.CTkLabel(
+                row,
                 text=description,
-                font=("Arial", 9),
-                bootstyle="secondary",
-                wraplength=300,
-            )
-            desc_label.pack(side=LEFT, anchor="w")
+                font=ctk.CTkFont(size=11),
+                text_color=COLORS["text_muted"],
+                anchor="w",
+                wraplength=320,
+                justify="left",
+            ).pack(side="left", padx=(0, 12), fill="x", expand=True)
 
-    def _create_warning_section(self, container):
-        """Criar seção de aviso"""
-        warning_frame = ttk_bs.LabelFrame(
-            container,
-            text="⚠️ IMPORTANTE - LEIA ANTES DE USAR",
-            bootstyle="danger",
-            padding=15,
+    def _create_warning_section(self, parent):
+        warn = ctk.CTkFrame(
+            parent,
+            fg_color="#2a1a1a",
+            corner_radius=10,
+            border_width=1,
+            border_color=COLORS["danger"],
         )
-        warning_frame.pack(fill=X, pady=(20, 0))
+        warn.pack(fill="x", pady=(20, 8))
 
-        warning_text = """🔴 ATENÇÃO: Estas funções são IRREVERSÍVEIS a não ser que tenha criado um ponto de restauração!
+        # Cabeçalho do aviso com ícone FA
+        header = ctk.CTkFrame(warn, fg_color="transparent")
+        header.pack(fill="x", padx=16, pady=(12, 4))
 
-📋 RECOMENDAÇÕES OBRIGATÓRIAS:
-• Crie um ponto de restauração ANTES de usar qualquer função
-• Leia as informações sobre cada otimização antes de aplicar
-• Não execute mais de uma otimização por vez
-• Execute como Administrador para melhores resultados
-• Reinicie o sistema após aplicar as otimizações
+        ctk.CTkLabel(
+            header,
+            text=ic.get("times"),
+            font=ctk.CTkFont(
+                family=ic.family("times"), size=14, weight=ic.weight("times")
+            ),
+            text_color=COLORS["danger"],
+        ).pack(side="left")
 
-⚠️ Use por sua conta e risco. Sempre faça backup do seu sistema!"""
+        ctk.CTkLabel(
+            header,
+            text="  IMPORTANTE — LEIA ANTES DE USAR",
+            font=ctk.CTkFont(size=13, weight="bold"),
+            text_color=COLORS["danger"],
+        ).pack(side="left")
 
-        warning_label = ttk_bs.Label(
-            warning_frame,
-            text=warning_text,
-            font=("Arial", 10),
-            foreground="red",
+        ctk.CTkLabel(
+            warn,
+            text=(
+                "ATENÇÃO: Estas funções são IRREVERSÍVEIS sem ponto de restauração!\n\n"
+                "  •  Crie um ponto de restauração ANTES de usar qualquer função\n"
+                "  •  Leia as informações sobre cada otimização antes de aplicar\n"
+                "  •  Não execute mais de uma otimização por vez\n"
+                "  •  Execute como Administrador para melhores resultados\n"
+                "  •  Reinicie o sistema após aplicar as otimizações\n\n"
+                "Use por sua conta e risco. Sempre faça backup do seu sistema!"
+            ),
+            font=ctk.CTkFont(size=11),
+            text_color="#f87171",
             justify="left",
-        )
-        warning_label.pack(anchor="w")
+            anchor="w",
+            wraplength=620,
+        ).pack(anchor="w", padx=16, pady=(0, 14))
 
-    def show_progress_dialog(self, title="Executando Otimização"):
-        """Criar janela de progresso"""
-        progress_window = tk.Toplevel(self.parent.parent.root)
-        progress_window.title(title)
-        progress_window.geometry("400x200")
-        progress_window.transient(self.parent.parent.root)
-        progress_window.grab_set()
+    def show_progress_dialog(self, title: str = "Executando Otimização"):
+        import tkinter as tk
 
-        # Centralizar janela
-        progress_window.geometry(
-            "+%d+%d"
-            % (
-                progress_window.winfo_screenwidth() // 2 - 200,
-                progress_window.winfo_screenheight() // 2 - 100,
-            )
-        )
+        win = ctk.CTkToplevel(self.parent.parent.root)
+        win.title(title)
+        win.geometry("460x260")
+        win.configure(fg_color=COLORS["content_bg"])
+        win.resizable(False, False)
+        win.transient(self.parent.parent.root)
+        win.grab_set()
+        win.update_idletasks()
+        x = win.winfo_screenwidth() // 2 - 230
+        y = win.winfo_screenheight() // 2 - 130
+        win.geometry(f"460x260+{x}+{y}")
 
-        # Label de status
-        status_label = ttk_bs.Label(
-            progress_window, text="Executando otimizações...", font=("Arial", 12)
+        status_label = ctk.CTkLabel(
+            win,
+            text="Executando otimizações...",
+            font=ctk.CTkFont(size=13),
+            text_color=COLORS["text_primary"],
         )
-        status_label.pack(pady=20)
+        status_label.pack(pady=(20, 8))
 
-        # Barra de progresso indeterminada
-        progress_bar = ttk_bs.Progressbar(
-            progress_window, mode="indeterminate", length=300
+        progress_bar = ctk.CTkProgressBar(
+            win, width=380, mode="indeterminate", progress_color=COLORS["accent"]
         )
-        progress_bar.pack(pady=10)
+        progress_bar.pack(pady=(0, 12))
         progress_bar.start()
 
-        # Texto de log (scrollable)
-        log_frame = ttk_bs.Frame(progress_window)
-        log_frame.pack(fill=BOTH, expand=True, padx=20, pady=(0, 20))
+        log_frame = ctk.CTkFrame(win, fg_color=COLORS["card_bg"], corner_radius=8)
+        log_frame.pack(fill="both", expand=True, padx=20, pady=(0, 20))
 
-        log_text = tk.Text(log_frame, height=6, wrap=tk.WORD)
-        log_scrollbar = ttk_bs.Scrollbar(
-            log_frame, orient="vertical", command=log_text.yview
+        log_text = tk.Text(
+            log_frame,
+            bg="#1a1a2e",
+            fg="#94a3b8",
+            relief="flat",
+            borderwidth=0,
+            font=("Consolas", 10),
+            wrap="word",
+            padx=8,
+            pady=6,
+            height=6,
         )
-        log_text.configure(yscrollcommand=log_scrollbar.set)
-
-        log_scrollbar.pack(side="right", fill="y")
+        sb = ctk.CTkScrollbar(log_frame, command=log_text.yview)
+        log_text.configure(yscrollcommand=sb.set)
         log_text.pack(side="left", fill="both", expand=True)
+        sb.pack(side="right", fill="y")
 
-        return progress_window, status_label, progress_bar, log_text
+        return win, status_label, progress_bar, log_text

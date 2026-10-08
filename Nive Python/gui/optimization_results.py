@@ -1,5 +1,3 @@
-# gui/optimization_results.py - Métodos para exibir resultados das otimizações
-
 from tkinter import messagebox
 
 

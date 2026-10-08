@@ -3,6 +3,7 @@
 import subprocess
 import os
 import sys
+import time
 from typing import Dict, List, Tuple, Optional
 
 
@@ -17,74 +18,55 @@ class DisableSoftware:
     def log(self, message: str, level: str = "INFO"):
         """Log de mensagens"""
         if self.logger:
-            if level == "ERROR":
+            if hasattr(self.logger, "error") and level == "ERROR":
                 self.logger.error(message)
-            else:
+            elif hasattr(self.logger, "info"):
                 self.logger.info(message)
+            else:
+                self.logger.log(message)
         else:
             print(f"[{level}] {message}")
 
-    def executar_desabilitacao_softwares(self):
-        sucessos = []
-        erros = []
-        softwares = [
-            "OneDrive",
-            "Cortana",
-            "XboxApp",
-            "Apps Store",
-            "Cortana",
-            "Microsoft Edge",
-            "Vínculo com celular",
-            "Paint",
-            "Hibernação",
-        ]
-
-        for software in softwares:
-            try:
-                self.log(f"Desabilitando {software}...")
-                subprocess.run(
-                    [
-                        "powershell",
-                        "Get-AppxPackage",
-                        software,
-                        "|",
-                        "Remove-AppxPackage",
-                    ],
-                    check=True,
-                )
-                sucessos.append(software)
-            except Exception as e:
-                erros.append((software, str(e)))
-                self.log(f"Erro ao desabilitar {software}: {e}")
-
-        success = len(erros) == 0
-        return success, sucessos, erros
-
     def run_command(
-        self, command: str, shell: bool = True, ignore_errors: bool = False
+        self,
+        command: str,
+        shell: bool = True,
+        ignore_errors: bool = False,
+        use_powershell: bool = False,
     ) -> Tuple[bool, str]:
-        """Executar comando do sistema"""
+        """Executar comando do sistema com melhor tratamento"""
         try:
             self.log(f"Executando: {command}")
 
+            # Se usar PowerShell, ajustar comando
+            if use_powershell:
+                command = f'powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "{command}"'
+
+            # Executar comando
             result = subprocess.run(
                 command,
                 shell=shell,
                 capture_output=True,
                 text=True,
-                timeout=300,  # 5 minutos timeout
+                timeout=60,  # Reduzido para 60 segundos
+                creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0,
             )
 
+            # Verificar resultado
             if result.returncode == 0 or ignore_errors:
-                self.log(f"Sucesso: {command}")
-                return True, result.stdout
+                self.log(f"Comando executado: {command}")
+                return True, result.stdout.strip()
             else:
-                self.log(f"Erro ao executar: {command} - {result.stderr}", "ERROR")
-                return False, result.stderr
+                error_msg = result.stderr.strip() or result.stdout.strip()
+                self.log(f"Erro ao executar: {command} - {error_msg}", "ERROR")
+                return False, error_msg
 
         except subprocess.TimeoutExpired:
             self.log(f"Timeout ao executar: {command}", "ERROR")
-            return False, "Timeout"
+            return False, "Timeout - comando demorou muito para executar"
+        except FileNotFoundError:
+            self.log(f"Comando não encontrado: {command}", "ERROR")
+            return False, "Comando não encontrado no sistema"
         except Exception as e:
             self.log(f"Exceção ao executar {command}: {str(e)}", "ERROR")
             return False, str(e)
@@ -92,164 +74,263 @@ class DisableSoftware:
     def disable_hibernation(self) -> bool:
         """Desativar modo hibernação"""
         self.log("Desativando modo hibernação...")
-        success, output = self.run_command("powercfg -h off")
 
-        if success:
+        success, output = self.run_command("powercfg /h off")
+
+        if success or "access" not in output.lower():
             self.results.append("✓ Modo hibernação desativado")
             return True
         else:
-            self.results.append("✗ Falha ao desativar hibernação")
+            self.results.append(
+                "✗ Falha ao desativar hibernação (sem privilégios administrativos)"
+            )
             return False
 
     def uninstall_paint(self) -> bool:
-        """Desinstalar Paint"""
+        """Desinstalar Paint usando winget"""
         self.log("Desinstalando Paint...")
+
+        # Tentar diferentes formas de remover o Paint
+        commands = [
+            "winget uninstall 9PCFS5B6T72H --silent --accept-source-agreements",
+            "winget uninstall Microsoft.Paint --silent --accept-source-agreements",
+            'winget uninstall "Microsoft Paint" --silent --accept-source-agreements',
+        ]
+
+        for cmd in commands:
+            success, output = self.run_command(cmd, ignore_errors=True)
+            if success or "successfully" in output.lower():
+                self.results.append("✓ Paint desinstalado")
+                return True
+            time.sleep(2)  # Aguardar entre tentativas
+
+        # Tentar via PowerShell como alternativa
+        ps_cmd = "Get-AppxPackage *Microsoft.Paint* | Remove-AppxPackage"
         success, output = self.run_command(
-            "winget uninstall 9PCFS5B6T72H", ignore_errors=True
+            ps_cmd, use_powershell=True, ignore_errors=True
         )
 
         if success:
-            self.results.append("✓ Paint desinstalado")
+            self.results.append("✓ Paint removido via PowerShell")
             return True
         else:
-            self.results.append("✗ Falha ao desinstalar Paint (pode já estar removido)")
+            self.results.append(
+                "✗ Paint não pôde ser removido (pode não estar instalado)"
+            )
             return False
 
     def uninstall_phone_link(self) -> bool:
         """Desinstalar Vínculo com celular"""
         self.log("Desinstalando Vínculo com celular...")
-        command = r'winget uninstall "MSIX\Microsoft.YourPhone_1.24062.101.0_x64__8wekyb3d8bbwe"'
-        success, output = self.run_command(command, ignore_errors=True)
 
-        if success:
-            self.results.append("✓ Vínculo com celular desinstalado")
-            return True
-        else:
-            self.results.append("✗ Falha ao desinstalar Vínculo com celular")
-            return False
-
-    def uninstall_edge(self) -> bool:
-        """Desinstalar Microsoft Edge completamente"""
-        self.log("Desinstalando Microsoft Edge...")
-
-        edge_commands = [
-            "winget uninstall Microsoft.Edge",
-            r'winget uninstall "ARP\Machine\X86\Microsoft Edge Update"',
-            "winget uninstall Microsoft.EdgeWebView2Runtime",
-            r'winget uninstall "MSIX\Microsoft.MicrosoftEdge.Stable_126.0.2592.113_neutral__8we"',
+        # Tentar diferentes métodos
+        commands = [
+            "winget uninstall Microsoft.YourPhone --silent --accept-source-agreements",
+            'winget uninstall "Vínculo com o smartphone" --silent --accept-source-agreements',
         ]
 
-        success_count = 0
-        for cmd in edge_commands:
+        for cmd in commands:
             success, output = self.run_command(cmd, ignore_errors=True)
-            if success:
-                success_count += 1
+            if success or "successfully" in output.lower():
+                self.results.append("✓ Vínculo com celular desinstalado")
+                return True
+            time.sleep(2)
 
-        if success_count > 0:
-            self.results.append(
-                f"✓ Microsoft Edge removido ({success_count}/4 componentes)"
-            )
+        # PowerShell como alternativa
+        ps_cmd = "Get-AppxPackage *Microsoft.YourPhone* | Remove-AppxPackage"
+        success, output = self.run_command(
+            ps_cmd, use_powershell=True, ignore_errors=True
+        )
+
+        if success:
+            self.results.append("✓ Vínculo com celular removido via PowerShell")
             return True
         else:
-            self.results.append("✗ Falha ao remover Microsoft Edge")
+            self.results.append("✗ Vínculo com celular não pôde ser removido")
             return False
 
     def uninstall_cortana(self) -> bool:
-        """Desinstalar COMPLETAMENTE a Cortana"""
+        """Desinstalar Cortana"""
         self.log("Desinstalando Cortana...")
 
-        powershell_cmd = (
-            "powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "
-            '"Get-AppxPackage -allusers Microsoft.549981C3F5F10 | Remove-AppxPackage"'
-        )
+        # PowerShell para remover Cortana
+        ps_commands = [
+            "Get-AppxPackage *Microsoft.549981C3F5F10* | Remove-AppxPackage",
+            "Get-AppxPackage -AllUsers *Cortana* | Remove-AppxPackage",
+        ]
 
-        success, output = self.run_command(powershell_cmd, ignore_errors=True)
+        success_count = 0
+        for cmd in ps_commands:
+            success, output = self.run_command(
+                cmd, use_powershell=True, ignore_errors=True
+            )
+            if success:
+                success_count += 1
+            time.sleep(2)
 
-        if success:
+        if success_count > 0:
             self.results.append("✓ Cortana desinstalada")
             return True
         else:
             self.results.append(
-                "✗ Falha ao desinstalar Cortana (pode já estar removida)"
+                "✗ Cortana não pôde ser removida (pode já estar removida)"
             )
             return False
 
     def uninstall_onedrive(self) -> bool:
-        """Remoção completa do OneDrive"""
+        """Remoção do OneDrive"""
         self.log("Removendo OneDrive...")
 
-        # Comandos para remover OneDrive
-        onedrive_commands = [
-            r'winget uninstall "MSIX\Microsoft.OneDriveSync_24116.609.5.0_neutral__8wekyb3d8bbwe"',
-            "winget uninstall Microsoft.OneDrive",
-            "taskkill /f /im OneDrive.exe",
-            r"%SystemRoot%\System32\OneDriveSetup.exe /uninstall",
-            r"%SystemRoot%\SysWOW64\OneDriveSetup.exe /uninstall",
+        success_count = 0
+
+        # 1. Matar processo do OneDrive
+        kill_cmd = "taskkill /f /im OneDrive.exe /t"
+        self.run_command(kill_cmd, ignore_errors=True)
+        time.sleep(3)
+
+        # 2. Tentar winget
+        winget_commands = [
+            "winget uninstall Microsoft.OneDrive --silent --accept-source-agreements",
+            "winget uninstall OneDrive --silent --accept-source-agreements",
         ]
 
-        success_count = 0
-        for cmd in onedrive_commands:
+        for cmd in winget_commands:
+            success, output = self.run_command(cmd, ignore_errors=True)
+            if success or "successfully" in output.lower():
+                success_count += 1
+            time.sleep(2)
+
+        # 3. Tentar desinstaladores nativos
+        uninstall_commands = [
+            r'"%SystemRoot%\System32\OneDriveSetup.exe" /uninstall',
+            r'"%SystemRoot%\SysWOW64\OneDriveSetup.exe" /uninstall',
+        ]
+
+        for cmd in uninstall_commands:
             success, output = self.run_command(cmd, ignore_errors=True)
             if success:
                 success_count += 1
+            time.sleep(2)
 
         if success_count > 0:
-            self.results.append(f"✓ OneDrive removido ({success_count}/5 operações)")
+            self.results.append(
+                f"✓ OneDrive removido ({success_count} operações bem-sucedidas)"
+            )
             return True
         else:
-            self.results.append("✗ Falha ao remover OneDrive")
+            self.results.append("✗ OneDrive não pôde ser removido completamente")
+            return False
+
+    def remove_xbox_apps(self) -> bool:
+        """Remover apps do Xbox"""
+        self.log("Removendo aplicativos Xbox...")
+
+        # PowerShell para remover Xbox apps
+        ps_commands = [
+            "Get-AppxPackage *Xbox* | Remove-AppxPackage",
+            "Get-AppxPackage *Microsoft.XboxApp* | Remove-AppxPackage",
+            "Get-AppxPackage *Microsoft.XboxGameOverlay* | Remove-AppxPackage",
+        ]
+
+        success_count = 0
+        for cmd in ps_commands:
+            success, output = self.run_command(
+                cmd, use_powershell=True, ignore_errors=True
+            )
+            if success:
+                success_count += 1
+            time.sleep(2)
+
+        if success_count > 0:
+            self.results.append("✓ Aplicativos Xbox removidos")
+            return True
+        else:
+            self.results.append("✗ Aplicativos Xbox não puderam ser removidos")
             return False
 
     def remove_store_apps(self) -> bool:
-        """Remoção de Apps da Store (mantendo essenciais)"""
-        self.log("Removendo Apps da Store desnecessários...")
+        """Remover alguns apps da Store (mantendo essenciais)"""
+        self.log("Removendo apps desnecessários da Store...")
 
-        powershell_cmd = (
-            "Powershell -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command "
-            "\"Get-AppxPackage | where-object {$_.name -notlike '*GamingApp*'} | "
-            "where-object {$_.name -notlike '*Winget*'} | "
-            "where-object {$_.name -notlike '*store*'} | "
-            "where-object {$_.name -notlike '*DesktopAppInstaller*'} | "
-            "where-object {$_.name -notlike '*xbox*'} | "
-            "where-object {$_.name -notlike '*terminal*'} | Remove-AppxPackage\""
-        )
+        # Apps específicos para remover
+        apps_to_remove = [
+            "*Microsoft.BingWeather*",
+            "*Microsoft.GetHelp*",
+            "*Microsoft.Getstarted*",
+            "*Microsoft.Microsoft3DViewer*",
+            "*Microsoft.MicrosoftOfficeHub*",
+            "*Microsoft.MicrosoftSolitaireCollection*",
+            "*Microsoft.MixedReality.Portal*",
+            "*Microsoft.Office.OneNote*",
+            "*Microsoft.People*",
+            "*Microsoft.SkypeApp*",
+            "*Microsoft.Wallet*",
+            "*Microsoft.WindowsCamera*",
+            "*Microsoft.WindowsMaps*",
+            "*Microsoft.ZuneMusic*",
+            "*Microsoft.ZuneVideo*",
+        ]
 
-        success, output = self.run_command(powershell_cmd, ignore_errors=True)
+        success_count = 0
+        for app in apps_to_remove:
+            cmd = f"Get-AppxPackage {app} | Remove-AppxPackage"
+            success, output = self.run_command(
+                cmd, use_powershell=True, ignore_errors=True
+            )
+            if success:
+                success_count += 1
+            time.sleep(1)
 
-        if success:
-            self.results.append("✓ Apps da Store desnecessários removidos")
+        if success_count > 0:
+            self.results.append(f"✓ {success_count} apps da Store removidos")
             return True
         else:
-            self.results.append("✗ Falha ao remover Apps da Store")
+            self.results.append("✗ Nenhum app da Store foi removido")
             return False
 
-    def execute_all(self) -> Dict[str, bool]:
-        """Executar todas as operações de remoção"""
-        self.log("Iniciando remoção de softwares desnecessários...")
-        self.results = []
+    def executar_desabilitacao_softwares(self):
+        """Método principal que executa todas as operações"""
+        self.log("Iniciando desabilitação de softwares...")
 
+        sucessos = []
+        erros = []
+
+        # Dicionário com todas as operações
         operations = {
-            "hibernation": self.disable_hibernation,
-            "paint": self.uninstall_paint,
-            "phone_link": self.uninstall_phone_link,
-            "edge": self.uninstall_edge,
-            "cortana": self.uninstall_cortana,
-            "onedrive": self.uninstall_onedrive,
-            "store_apps": self.remove_store_apps,
+            "Modo Hibernação": self.disable_hibernation,
+            "Microsoft Paint": self.uninstall_paint,
+            "Vínculo com Celular": self.uninstall_phone_link,
+            "Cortana": self.uninstall_cortana,
+            "OneDrive": self.uninstall_onedrive,
+            "Xbox Apps": self.remove_xbox_apps,
+            "Apps da Store": self.remove_store_apps,
         }
 
-        results = {}
-
+        # Executar cada operação
         for name, operation in operations.items():
             try:
-                results[name] = operation()
+                self.log(f"Executando: {name}")
+                if operation():
+                    sucessos.append(name)
+                    self.log(f"✓ {name} - Sucesso")
+                else:
+                    erros.append(f"{name} - Falha na operação")
+                    self.log(f"✗ {name} - Falhou")
             except Exception as e:
-                self.log(f"Erro na operação {name}: {str(e)}", "ERROR")
-                results[name] = False
-                self.results.append(f"✗ Erro em {name}: {str(e)}")
+                error_msg = f"{name} - Erro: {str(e)}"
+                erros.append(error_msg)
+                self.log(f"✗ {name} - Exceção: {str(e)}", "ERROR")
 
-        self.log("Operações de remoção concluídas!")
-        return results
+            # Pequena pausa entre operações
+            time.sleep(1)
+
+        # Determinar sucesso geral
+        success = len(sucessos) > len(erros)
+
+        self.log(
+            f"Operações concluídas - Sucessos: {len(sucessos)}, Erros: {len(erros)}"
+        )
+        return success, sucessos, erros
 
     def get_results_summary(self) -> List[str]:
         """Obter resumo dos resultados"""
@@ -258,28 +339,24 @@ class DisableSoftware:
 
 def main():
     """Função principal para execução standalone"""
-    print("NiveBoost - Desabilitador de Software v1.0")
+    print("NiveBoost - Desabilitador de Software v2.0")
     print("=" * 50)
 
     disabler = DisableSoftware()
-    results = disabler.execute_all()
+    success, sucessos, erros = disabler.executar_desabilitacao_softwares()
 
     print("\nResumo das operações:")
     print("-" * 30)
     for result in disabler.get_results_summary():
         print(result)
 
-    successful = sum(1 for success in results.values() if success)
-    total = len(results)
+    print(f"\nSucessos: {len(sucessos)}")
+    print(f"Erros: {len(erros)}")
 
-    print(f"\nOperações bem-sucedidas: {successful}/{total}")
-
-    if successful == total:
-        print("✓ Todas as operações foram executadas com sucesso!")
-    elif successful > 0:
-        print("⚠ Algumas operações falharam, mas outras foram bem-sucedidas")
+    if success:
+        print("✓ Operação concluída com sucesso!")
     else:
-        print("✗ Todas as operações falharam")
+        print("⚠ Operação concluída com alguns problemas")
 
 
 if __name__ == "__main__":

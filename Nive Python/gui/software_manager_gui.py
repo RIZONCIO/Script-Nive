@@ -1,216 +1,281 @@
-# gui/software_manager_gui.py - Interface do gerenciador de software
+"""
+software_manager_gui.py - Gerenciador de software (customtkinter)
+"""
 
 import threading
 import tkinter as tk
-from tkinter import messagebox, scrolledtext
-import ttkbootstrap as ttk_bs
+from tkinter import messagebox
+import customtkinter as ctk
 from core.software_manager import SoftwareManager
+
+COLORS = {
+    "content_bg": "#1e1e2e",
+    "card_bg": "#252537",
+    "card_hover": "#2e2e45",
+    "accent": "#4f9cf9",
+    "text_primary": "#e2e8f0",
+    "text_muted": "#8892a4",
+    "success": "#22c55e",
+    "danger": "#ef4444",
+    "info": "#3b82f6",
+}
 
 
 class SoftwareManagerGUI:
-    """Classe responsável pela interface do gerenciador de software"""
+    """Interface do gerenciador de software — modernizada."""
 
     def __init__(self, parent_interface):
-        """Inicializar gerenciador de software GUI"""
         self.parent = parent_interface
         self.system_commands = parent_interface.system_commands
         self.config = parent_interface.config
         self.logger = parent_interface.logger
 
-        # Variáveis da interface
         self.software_window = None
         self.software_manager = None
         self.software_list = []
         self.software_listbox = None
         self.software_log_text = None
 
+    # ── Entrada principal ────────────────────────────────────────────────────
+
     def reinstall_software_placeholder(self):
-        """Nova implementação para reinstalar software"""
         try:
-            # Criar instância do gerenciador
             manager = SoftwareManager()
 
-            # Verifica privilégios de administrador
             if not manager.check_admin_privileges():
                 messagebox.showerror(
                     "Privilégios Insuficientes",
                     "Esta funcionalidade requer privilégios de administrador.\n\n"
-                    "Por favor, execute o ScriptNive como administrador.",
+                    "Execute o ScriptNive como administrador.",
                 )
                 return
 
-            # Verifica Chocolatey
             if not manager.check_chocolatey_installed():
-                response = messagebox.askyesno(
+                if messagebox.askyesno(
                     "Chocolatey Não Encontrado",
-                    "O Chocolatey não está instalado e é necessário para esta funcionalidade.\n\n"
-                    "Deseja instalar o Chocolatey automaticamente?",
-                )
-
-                if response:
+                    "O Chocolatey não está instalado e é necessário.\n\n"
+                    "Deseja instalá-lo automaticamente?",
+                ):
                     self.install_chocolatey_with_progress(manager)
-                else:
-                    return
+                return
 
-            # Cria interface do gerenciador de software
             self.create_software_manager_interface(manager)
 
         except Exception as e:
-            messagebox.showerror("Erro", f"Erro ao abrir gerenciador de software: {e}")
+            messagebox.showerror("Erro", f"Erro ao abrir gerenciador de software:\n{e}")
+
+    # ── Instalação do Chocolatey ─────────────────────────────────────────────
 
     def install_chocolatey_with_progress(self, manager):
-        """Instala Chocolatey com janela de progresso"""
-        progress_window = tk.Toplevel(self.parent.root)
-        progress_window.title("Instalando Chocolatey")
-        progress_window.geometry("400x150")
-        progress_window.resizable(False, False)
-        progress_window.transient(self.parent.root)
-        progress_window.grab_set()
-
-        # Centralizar janela
-        progress_window.geometry(
-            "+%d+%d"
-            % (self.parent.root.winfo_rootx() + 50, self.parent.root.winfo_rooty() + 50)
+        win = ctk.CTkToplevel(self.parent.root)
+        win.title("Instalando Chocolatey")
+        win.geometry("400x160")
+        win.resizable(False, False)
+        win.configure(fg_color=COLORS["content_bg"])
+        win.transient(self.parent.root)
+        win.grab_set()
+        win.geometry(
+            f"+{self.parent.root.winfo_rootx() + 50}"
+            f"+{self.parent.root.winfo_rooty() + 50}"
         )
 
-        frame = ttk_bs.Frame(progress_window, padding="20")
-        frame.pack(fill=tk.BOTH, expand=True)
+        frame = ctk.CTkFrame(win, fg_color="transparent")
+        frame.pack(fill="both", expand=True, padx=20, pady=16)
 
-        ttk_bs.Label(frame, text="Instalando Chocolatey...", font=("Arial", 10)).pack(
-            pady=(0, 10)
+        ctk.CTkLabel(
+            frame,
+            text="Instalando Chocolatey...",
+            font=ctk.CTkFont(size=13),
+            text_color=COLORS["text_primary"],
+        ).pack(pady=(0, 10))
+
+        bar = ctk.CTkProgressBar(
+            frame, mode="indeterminate", progress_color=COLORS["accent"]
         )
+        bar.pack(fill="x", pady=(0, 10))
+        bar.start()
 
-        progress = ttk_bs.Progressbar(frame, mode="indeterminate")
-        progress.pack(fill=tk.X, pady=(0, 10))
-        progress.start()
-
-        ttk_bs.Label(frame, text="Por favor, aguarde...").pack()
+        ctk.CTkLabel(
+            frame,
+            text="Por favor, aguarde...",
+            text_color=COLORS["text_muted"],
+            font=ctk.CTkFont(size=11),
+        ).pack()
 
         def install_in_thread():
             try:
                 success = manager.install_chocolatey()
-                progress_window.after(0, progress.stop)
-                progress_window.after(0, progress_window.destroy)
+                win.after(0, bar.stop)
+                win.after(0, win.destroy)
                 if success:
                     messagebox.showinfo("Sucesso", "Chocolatey instalado com sucesso!")
                 else:
                     messagebox.showerror("Erro", "Falha na instalação do Chocolatey.")
             except Exception as e:
-                progress_window.after(0, progress.stop)
-                progress_window.after(0, progress_window.destroy)
-                messagebox.showerror("Erro", f"Erro durante instalação: {e}")
+                win.after(0, bar.stop)
+                win.after(0, win.destroy)
+                messagebox.showerror("Erro", f"Erro durante instalação:\n{e}")
 
         threading.Thread(target=install_in_thread, daemon=True).start()
 
-    def create_software_manager_interface(self, manager):
-        """Cria interface do gerenciador de software"""
-        # Cria janela principal
-        self.software_window = tk.Toplevel(self.parent.root)
-        self.software_window.title("Gerenciador de Software - ScriptNive")
-        self.software_window.geometry("800x600")
-        self.software_window.resizable(True, True)
+    # ── Interface principal do gerenciador ───────────────────────────────────
 
-        # Centraliza janela
+    def create_software_manager_interface(self, manager):
+        self.software_window = ctk.CTkToplevel(self.parent.root)
+        self.software_window.title("Gerenciador de Software — ScriptNive")
+        self.software_window.geometry("820x620")
+        self.software_window.configure(fg_color=COLORS["content_bg"])
+        self.software_window.resizable(True, True)
         self.software_window.transient(self.parent.root)
         self.software_window.grab_set()
 
-        # Variáveis da interface
         self.software_manager = manager
         self.software_list = []
-
         self.setup_software_interface()
         self.load_software_list()
 
     def setup_software_interface(self):
-        """Configura a interface do gerenciador de software"""
+        win = self.software_window
 
-        # Frame principal
-        main_frame = ttk_bs.Frame(self.software_window, padding="10")
-        main_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        # Layout: topo (lista) + baixo (log)
+        win.rowconfigure(0, weight=3)
+        win.rowconfigure(1, weight=1)
+        win.columnconfigure(0, weight=1)
 
-        # Configurar grid
-        self.software_window.columnconfigure(0, weight=1)
-        self.software_window.rowconfigure(0, weight=1)
-        main_frame.columnconfigure(1, weight=1)
-        main_frame.rowconfigure(1, weight=1)
+        # ── Painel superior ──────────────────────────────────────────────────
+        top = ctk.CTkFrame(
+            win,
+            fg_color=COLORS["card_bg"],
+            corner_radius=10,
+            border_width=1,
+            border_color="#2d2d44",
+        )
+        top.grid(row=0, column=0, sticky="nsew", padx=14, pady=(14, 6))
+        top.rowconfigure(1, weight=1)
+        top.columnconfigure(0, weight=1)
 
-        # Título
-        title_label = ttk_bs.Label(
-            main_frame,
+        ctk.CTkLabel(
+            top,
             text="Selecione o software para reinstalar:",
-            font=("Arial", 12, "bold"),
-        )
-        title_label.grid(row=0, column=0, columnspan=3, pady=(0, 10), sticky=tk.W)
+            font=ctk.CTkFont(size=13, weight="bold"),
+            text_color=COLORS["text_primary"],
+        ).grid(row=0, column=0, sticky="w", padx=14, pady=(12, 6))
 
-        # Frame da lista
-        list_frame = ttk_bs.Frame(main_frame)
-        list_frame.grid(
-            row=1, column=0, columnspan=3, sticky=(tk.W, tk.E, tk.N, tk.S), pady=(0, 10)
-        )
-        list_frame.columnconfigure(0, weight=1)
+        # Lista com scrollbar
+        list_frame = ctk.CTkFrame(top, fg_color="transparent")
+        list_frame.grid(row=1, column=0, sticky="nsew", padx=10, pady=(0, 8))
         list_frame.rowconfigure(0, weight=1)
+        list_frame.columnconfigure(0, weight=1)
 
-        # Lista de software com scrollbar
-        self.software_listbox = tk.Listbox(list_frame, height=15, font=("Consolas", 9))
-        scrollbar = ttk_bs.Scrollbar(
-            list_frame, orient=tk.VERTICAL, command=self.software_listbox.yview
+        self.software_listbox = tk.Listbox(
+            list_frame,
+            bg="#1a1a2e",
+            fg="#94a3b8",
+            selectbackground=COLORS["accent"],
+            selectforeground="#ffffff",
+            relief="flat",
+            borderwidth=0,
+            font=("Consolas", 10),
+            activestyle="none",
         )
-        self.software_listbox.configure(yscrollcommand=scrollbar.set)
-
-        self.software_listbox.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
-        scrollbar.grid(row=0, column=1, sticky=(tk.N, tk.S))
-
-        # Frame de botões
-        button_frame = ttk_bs.Frame(main_frame)
-        button_frame.grid(
-            row=2, column=0, columnspan=3, pady=(10, 0), sticky=(tk.W, tk.E)
-        )
+        sb = ctk.CTkScrollbar(list_frame, command=self.software_listbox.yview)
+        self.software_listbox.configure(yscrollcommand=sb.set)
+        self.software_listbox.grid(row=0, column=0, sticky="nsew")
+        sb.grid(row=0, column=1, sticky="ns")
 
         # Botões
-        ttk_bs.Button(
-            button_frame, text="Atualizar Lista", command=self.load_software_list
-        ).pack(side=tk.LEFT, padx=(0, 5))
+        btn_row = ctk.CTkFrame(top, fg_color="transparent")
+        btn_row.grid(row=2, column=0, sticky="ew", padx=10, pady=(0, 12))
 
-        ttk_bs.Button(
-            button_frame,
-            text="Reinstalar Selecionado",
+        ctk.CTkButton(
+            btn_row,
+            text="🔄  Atualizar Lista",
+            command=self.load_software_list,
+            fg_color=COLORS["card_hover"],
+            hover_color="#3a3a55",
+            border_width=1,
+            border_color="#3d3d5c",
+            corner_radius=8,
+            height=34,
+        ).pack(side="left", padx=(0, 8))
+
+        ctk.CTkButton(
+            btn_row,
+            text="⬇  Reinstalar Selecionado",
             command=self.reinstall_selected_software,
-        ).pack(side=tk.LEFT, padx=5)
+            fg_color=COLORS["info"],
+            hover_color="#2563eb",
+            corner_radius=8,
+            height=34,
+        ).pack(side="left", padx=(0, 8))
 
-        ttk_bs.Button(
-            button_frame, text="Fechar", command=self.software_window.destroy
-        ).pack(side=tk.RIGHT)
+        ctk.CTkButton(
+            btn_row,
+            text="✕  Fechar",
+            command=self.software_window.destroy,
+            fg_color=COLORS["card_hover"],
+            hover_color="#3a3a55",
+            border_width=1,
+            border_color="#3d3d5c",
+            corner_radius=8,
+            height=34,
+        ).pack(side="right")
 
-        # Área de log
-        log_frame = ttk_bs.LabelFrame(main_frame, text="Log de Operações", padding="5")
-        log_frame.grid(
-            row=3, column=0, columnspan=3, sticky=(tk.W, tk.E, tk.N, tk.S), pady=(10, 0)
+        # ── Painel de log ────────────────────────────────────────────────────
+        log_outer = ctk.CTkFrame(
+            win,
+            fg_color=COLORS["card_bg"],
+            corner_radius=10,
+            border_width=1,
+            border_color="#2d2d44",
         )
-        log_frame.columnconfigure(0, weight=1)
-        log_frame.rowconfigure(0, weight=1)
+        log_outer.grid(row=1, column=0, sticky="nsew", padx=14, pady=(0, 14))
+        log_outer.rowconfigure(1, weight=1)
+        log_outer.columnconfigure(0, weight=1)
 
-        self.software_log_text = scrolledtext.ScrolledText(
-            log_frame, height=8, font=("Consolas", 8)
+        ctk.CTkLabel(
+            log_outer,
+            text="Log de Operações",
+            font=ctk.CTkFont(size=12, weight="bold"),
+            text_color=COLORS["text_muted"],
+        ).grid(row=0, column=0, sticky="w", padx=14, pady=(8, 2))
+
+        log_inner = ctk.CTkFrame(log_outer, fg_color="transparent")
+        log_inner.grid(row=1, column=0, sticky="nsew", padx=8, pady=(0, 8))
+        log_inner.rowconfigure(0, weight=1)
+        log_inner.columnconfigure(0, weight=1)
+
+        self.software_log_text = tk.Text(
+            log_inner,
+            bg="#1a1a2e",
+            fg="#94a3b8",
+            relief="flat",
+            borderwidth=0,
+            font=("Consolas", 10),
+            wrap="word",
+            padx=8,
+            pady=6,
+            state="normal",
         )
-        self.software_log_text.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        log_sb = ctk.CTkScrollbar(log_inner, command=self.software_log_text.yview)
+        self.software_log_text.configure(yscrollcommand=log_sb.set)
+        self.software_log_text.grid(row=0, column=0, sticky="nsew")
+        log_sb.grid(row=0, column=1, sticky="ns")
 
-        main_frame.rowconfigure(3, weight=1)
+    # ── Lógica ───────────────────────────────────────────────────────────────
 
     def log_software_message(self, message):
-        """Adiciona mensagem ao log do software"""
         if self.software_log_text:
             self.software_log_text.insert(tk.END, f"{message}\n")
             self.software_log_text.see(tk.END)
             self.software_log_text.update()
 
     def load_software_list(self):
-        """Carrega lista de software instalado"""
         self.log_software_message("Carregando lista de software instalado...")
 
-        def load_in_thread():
+        def _run():
             try:
                 self.software_list = self.software_manager.get_installed_software()
-                # Atualiza interface na thread principal
                 self.software_window.after(0, self.update_software_listbox)
             except Exception as e:
                 self.software_window.after(
@@ -220,93 +285,63 @@ class SoftwareManagerGUI:
                     ),
                 )
 
-        # Carrega em thread separada para não travar a interface
-        threading.Thread(target=load_in_thread, daemon=True).start()
+        threading.Thread(target=_run, daemon=True).start()
 
     def update_software_listbox(self):
-        """Atualiza a listbox com o software encontrado"""
         if self.software_listbox:
             self.software_listbox.delete(0, tk.END)
-
-            for i, software in enumerate(self.software_list):
-                self.software_listbox.insert(
-                    tk.END, f"{i:3d} - {software['display_name']}"
-                )
-
+            for i, sw in enumerate(self.software_list):
+                self.software_listbox.insert(tk.END, f"  {i:3d}  {sw['display_name']}")
             self.log_software_message(
                 f"Encontrados {len(self.software_list)} softwares instalados."
             )
 
     def reinstall_selected_software(self):
-        """Reinstala o software selecionado"""
         if not self.software_listbox:
             return
-
-        selection = self.software_listbox.curselection()
-
-        if not selection:
+        sel = self.software_listbox.curselection()
+        if not sel:
             messagebox.showwarning(
-                "Seleção Necessária", "Por favor, selecione um software da lista."
+                "Seleção necessária", "Por favor, selecione um software da lista."
             )
             return
 
-        index = selection[0]
-        selected_software = self.software_list[index]
-
-        # Confirmação
-        response = messagebox.askyesno(
+        sw = self.software_list[sel[0]]
+        if not messagebox.askyesno(
             "Confirmar Reinstalação",
-            "Deseja desinstalar e reinstalar o seguinte software?\n\n"
-            f"Nome: {selected_software['display_name']}\n\n"
-            "AVISO: Esta operação irá:\n"
-            "1. Desinstalar o software atual\n"
-            "2. Tentar reinstalá-lo via Chocolatey\n\n"
-            "Continuar?",
-        )
-
-        if not response:
+            f"Deseja desinstalar e reinstalar:\n\n{sw['display_name']}\n\n"
+            "1. Desinstala o software atual\n"
+            "2. Reinstala via Chocolatey\n\nContinuar?",
+        ):
             return
 
-        # Executa reinstalação em thread separada
-        def reinstall_in_thread():
+        def _run():
             try:
                 self.software_window.after(
                     0,
                     lambda: self.log_software_message(
-                        f"Iniciando reinstalação de: {selected_software['display_name']}"
+                        f"Iniciando reinstalação de: {sw['display_name']}"
                     ),
                 )
-
-                success, message = self.software_manager.process_software_reinstall(
-                    selected_software
+                success, message = self.software_manager.process_software_reinstall(sw)
+                icon = "✅" if success else "❌"
+                self.software_window.after(
+                    0, lambda: self.log_software_message(f"{icon} {message}")
                 )
-
-                # Atualiza interface na thread principal
                 if success:
-                    self.software_window.after(
-                        0, lambda: self.log_software_message(f"✅ {message}")
-                    )
                     self.software_window.after(
                         0, lambda: messagebox.showinfo("Sucesso", message)
                     )
                 else:
                     self.software_window.after(
-                        0, lambda: self.log_software_message(f"❌ {message}")
-                    )
-                    self.software_window.after(
                         0, lambda: messagebox.showerror("Erro", message)
                     )
-
-                # Atualiza lista
                 self.software_window.after(0, self.load_software_list)
-
             except Exception as e:
-                error_msg = f"Erro durante reinstalação: {e}"
+                msg = f"Erro durante reinstalação: {e}"
                 self.software_window.after(
-                    0, lambda: self.log_software_message(f"❌ {error_msg}")
+                    0, lambda: self.log_software_message(f"❌ {msg}")
                 )
-                self.software_window.after(
-                    0, lambda: messagebox.showerror("Erro", error_msg)
-                )
+                self.software_window.after(0, lambda: messagebox.showerror("Erro", msg))
 
-        threading.Thread(target=reinstall_in_thread, daemon=True).start()
+        threading.Thread(target=_run, daemon=True).start()

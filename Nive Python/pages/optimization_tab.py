@@ -1,5 +1,3 @@
-# gui/optimization_tab.py - Aba de otimização NiveBoost (Refatorada)
-
 import tkinter as tk
 from tkinter import messagebox
 import ttkbootstrap as ttk_bs
@@ -11,8 +9,8 @@ import os
 sys.path.append(os.path.join(os.path.dirname(os.path.dirname(__file__)), "core"))
 
 # Importar handlers específicos
-from .optimization_handlers import OptimizationHandlers
-from .optimization_ui import OptimizationUI
+from gui.optimization_handlers import OptimizationHandlers
+from gui.optimization_ui import OptimizationUI
 
 
 class OptimizationTab:

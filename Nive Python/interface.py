@@ -1,93 +1,98 @@
-from gui.base_interface import BaseInterface
-from gui.main_tab import MainTab
-from gui.system_tab import SystemTab
-from gui.optimization_tab import OptimizationTab
-from gui.tools_tab import ToolsTab
-from gui.info_tab import InfoTab
+"""
+interface.py - ScriptNiveInterface modernizada
+Conecta a BaseInterface (sidebar) com as páginas (cards)
+"""
+
+import customtkinter as ctk
+from gui.base_interface import BaseInterface, COLORS
+from pages.main_tab import MainTab
+from pages.optimization_tab import OptimizationTab
+from pages.tools_tab import ToolsTab
+from pages.info_tab import InfoTab
+from pages.network_tab import NetworkTab
 from gui.software_manager_gui import SoftwareManagerGUI
 from gui.repair_dialog import RepairDialog
 
+# (page_key, icon_key, título, subtítulo)
+PAGE_META = {
+    "main": ("home", "Principal", "Ferramentas mais usadas do Windows"),
+    "network": ("network", "Rede", "Diagnóstico e reparo de rede"),
+    "optimization": ("bolt", "Otimização", "NiveBoost — acelere o Windows"),
+    "tools": ("tools", "Ferramentas", "Diagnóstico e log de atividades"),
+    "info": ("info", "Sobre", "ScriptNive — créditos e documentação"),
+}
+
 
 class ScriptNiveInterface:
-    """Classe da interface gráfica principal - Versão Refatorada"""
+    """Interface gráfica principal — versão modernizada com sidebar."""
 
     def __init__(self, root, system_commands, logger, config):
-        """Inicializar interface"""
         self.root = root
         self.system_commands = system_commands
         self.logger = logger
         self.config = config
 
-        # Criar interface base
         self.base_interface = BaseInterface(root, system_commands, logger, config)
+        self._setup_placeholders()
 
-        # CORREÇÃO: Adicionar os placeholders na base_interface
-        self.setup_placeholders()
-
-        # Inicializar componentes das abas
         self.main_tab = MainTab(self.base_interface)
-        self.system_tab = SystemTab(self.base_interface)
         self.optimization_tab = OptimizationTab(self.base_interface)
         self.tools_tab = ToolsTab(self.base_interface)
         self.info_tab = InfoTab(self.base_interface)
+        self.network_tab = NetworkTab(self.base_interface)
 
-        # Inicializar componentes de diálogos
         self.software_manager = SoftwareManagerGUI(self.base_interface)
         self.repair_dialog = RepairDialog(self.base_interface)
 
-        # Criar interface
-        self.create_widgets()
+        self._create_widgets()
 
-    def setup_placeholders(self):
-        self.base_interface.reinstall_software_placeholder = (
-            self.reinstall_software_placeholder
-        )
-        self.base_interface.complete_repair_placeholder = (
-            self.complete_repair_placeholder
-        )
+    def _setup_placeholders(self):
+        self.base_interface.reinstall_software_placeholder = self._reinstall
+        self.base_interface.complete_repair_placeholder = self._complete_repair
 
-    def create_widgets(self):
-        """Criar todos os widgets da interface"""
-        # Configurar estrutura base
-        main_frame = self.base_interface.setup_base_widgets()
+    def _create_widgets(self):
+        self.base_interface.setup_base_widgets()
+        content = self.base_interface.get_content_area()
 
-        # Criar todas as abas
-        self.create_all_tabs()
+        pages = {
+            "main": self.main_tab.create_main_tab(content),
+            "network": self.network_tab.create_network_tab(content),
+            "optimization": self.optimization_tab.create_optimization_tab(content),
+            "tools": self.tools_tab.create_tools_tab(content),
+            "info": self.info_tab.create_info_tab(content),
+        }
 
-        # Configurar logger para usar o widget de texto após criação das abas
-        if hasattr(self.tools_tab, "log_text"):
+        for key, frame in pages.items():
+            if frame is not None:
+                self.base_interface.register_page(key, frame)
+
+        if hasattr(self.tools_tab, "log_text") and self.tools_tab.log_text:
             self.logger.set_widget(self.tools_tab.log_text)
 
-    def create_all_tabs(self):
-        """Criar todas as abas do notebook"""
-        notebook = self.base_interface.notebook
+        # Sobrescreve navigate_to para atualizar o header com ícone FA
+        _original_navigate = self.base_interface.navigate_to
 
-        # Criar cada aba
-        self.main_tab.create_main_tab(notebook)
-        self.system_tab.create_system_tab(notebook)
-        self.optimization_tab.create_optimization_tab(notebook)
-        self.tools_tab.create_tools_tab(notebook)
-        self.info_tab.create_info_tab(notebook)
+        def navigate_with_header(page_key: str):
+            _original_navigate(page_key)
+            if page_key in PAGE_META:
+                icon_key, title, subtitle = PAGE_META[page_key]
+                self.base_interface.set_header(icon_key, title, subtitle)
 
-    # Métodos de conveniência para acessar funcionalidades das abas
-    def update_status(self, message):
-        """Atualizar mensagem de status"""
-        self.base_interface.update_status(message)
+        self.base_interface.navigate_to = navigate_with_header
+        self.base_interface.navigate_to("main")
 
-    def log_activity(self, message):
-        """Registrar atividade no log"""
-        self.base_interface.log_activity(message)
-
-    # Métodos que são chamados pelas abas (delegação)
-    def reinstall_software_placeholder(self):
-        """Delegar para o gerenciador de software"""
+    def _reinstall(self):
         return self.software_manager.reinstall_software_placeholder()
 
-    def complete_repair_placeholder(self):
-        """Delegar para o diálogo de reparo"""
+    def _complete_repair(self):
         return self.repair_dialog.complete_repair_placeholder()
 
-    # Propriedades para compatibilidade com código existente
+    def update_status(self, message: str):
+        self.base_interface.update_status(message)
+
+    def log_activity(self, message: str):
+        self.base_interface.log_activity(message)
+
     @property
     def status_var(self):
         return self.base_interface.status_var

@@ -69,15 +69,25 @@ class SystemCommands:
 
     def empty_recycle_bin(self):
         """Esvaziar lixeira"""
-        command = "rd /S /Q c:\\$Recycle.bin"
+        command = (
+            'powershell -NoProfile -Command "'
+            "try { Clear-RecycleBin -Force -ErrorAction Stop } "
+            "catch { Write-Error $_.Exception.Message; exit 1 }"
+            '"'
+        )
 
         def success_callback(output):
-            self.logger.log_success("Lixeira esvaziada com sucesso!")
+            self.logger.log_success("Lixeira esvaziada com sucesso")
             messagebox.showinfo("Sucesso", "Lixeira esvaziada com sucesso!")
 
         def error_callback(error):
             self.logger.log_error("Erro ao esvaziar lixeira")
-            messagebox.showerror("Erro", f"Erro ao esvaziar lixeira:\n{error}")
+            self.logger.log(f"Detalhe do erro na lixeira: {error}")
+            message = (
+                "Não foi possível esvaziar totalmente a lixeira. "
+                "Alguns itens podem estar em uso ou exigir privilégios elevados."
+            )
+            messagebox.showwarning("Atenção", message)
 
         return self.run_command_async(command, success_callback, error_callback)
 
@@ -197,27 +207,147 @@ class SystemCommands:
         messagebox.showinfo("Sucesso", "Arquivos temporários limpos com sucesso!")
 
     def clean_dns_cache(self):
-        """Limpar cache DNS"""
-        commands = [
-            "netsh winsock reset",
-            "netsh int ip reset",
-            "ipconfig /release",
-            "ipconfig /renew",
-            "ipconfig /flushdns",
-            "ipconfig /registerdns",
+        """Limpar cache DNS - Versão corrigida"""
+
+        # Primeiro, verificar se é necessário executar como administrador
+        import ctypes
+        import sys
+
+        def is_admin():
+            try:
+                return ctypes.windll.shell32.IsUserAnAdmin()
+            except:
+                return False
+
+        if not is_admin():
+            self.logger.log_error("Operação requer privilégios de administrador")
+            messagebox.showerror(
+                "Erro - Privilégios",
+                "Esta operação requer privilégios de administrador.\n"
+                "Execute o programa como Administrador e tente novamente.",
+            )
+            return
+
+        # Comandos de limpeza DNS separados para melhor controle
+        dns_commands = [
+            (
+                "Resetando Winsock (repara catálogo de sockets)...",
+                "netsh winsock reset",
+            ),
+            (
+                "Resetando pilha TCP/IP (repara configurações IP)...",
+                "netsh int ip reset",
+            ),
+            (
+                "Limpando cache NetBIOS (purga nomes locais)...",
+                "nbtstat -R",
+            ),  # Extra: útil para problemas de nomes de rede
+            (
+                "Liberando nomes NetBIOS (atualiza registro)...",
+                "nbtstat -RR",
+            ),  # Extra: complementa o anterior
+            (
+                "Limpando cache ARP (remove mapeamentos de IP para MAC)...",
+                "arp -d *",
+            ),  # Extra: bom para conflitos de hardware na rede
+            (
+                "Parando serviço DNS Client...",
+                "net stop dnscache",
+            ),  # Da sua lista, opcional mas ajuda em flushes mais profundos
+            ("Limpando cache DNS...", "ipconfig /flushdns"),
+            ("Reiniciando serviço DNS Client...", "net start dnscache"),  # Da sua lista
+            ("Liberando IP atual...", "ipconfig /release"),
+            ("Renovando IP...", "ipconfig /renew"),
+            ("Registrando DNS...", "ipconfig /registerdns"),
         ]
 
-        full_command = " && ".join(commands)
+        def execute_dns_cleanup():
+            success_count = 0
+            total_commands = len(dns_commands)
+
+            try:
+                for description, command in dns_commands:
+                    self.logger.log(f"{description}")
+
+                    # Executar comando individual
+                    result = subprocess.run(
+                        command, shell=True, capture_output=True, text=True, timeout=60
+                    )
+
+                    if result.returncode == 0:
+                        success_count += 1
+                        self.logger.log_success(f"✓ {description} - Sucesso")
+                    else:
+                        self.logger.log_warning(
+                            f"⚠ {description} - Código: {result.returncode}"
+                        )
+                        # Continuar mesmo se um comando falhar
+
+                # Comandos adicionais de reset de rede (opcionais)
+                additional_commands = ["netsh winsock reset", "netsh int ip reset"]
+
+                for cmd in additional_commands:
+                    try:
+                        result = subprocess.run(
+                            cmd, shell=True, capture_output=True, text=True, timeout=30
+                        )
+                        if result.returncode == 0:
+                            success_count += 1
+                            self.logger.log_success(f"✓ {cmd} - Sucesso")
+                    except:
+                        self.logger.log_warning(f"⚠ Comando opcional falhou: {cmd}")
+
+                return (
+                    success_count > 0,
+                    f"Executados {success_count} comandos com sucesso",
+                )
+
+            except subprocess.TimeoutExpired:
+                return False, "Timeout - Operação demorou muito para completar"
+            except Exception as e:
+                return False, f"Erro inesperado: {str(e)}"
 
         def success_callback(output):
-            self.logger.log_success("Cache DNS limpo com sucesso")
-            messagebox.showinfo("Sucesso", "Cache DNS limpo com sucesso!")
+            self.logger.log_success("Cache DNS limpo com sucesso!")
+            messagebox.showinfo(
+                "Sucesso",
+                "Cache DNS limpo com sucesso!\n\n"
+                "Recomenda-se reiniciar o navegador para aplicar as mudanças.\n\n"
+                "Detalhes no log.",
+            )
 
         def error_callback(error):
-            self.logger.log_error("Erro ao limpar cache DNS")
-            messagebox.showerror("Erro", f"Erro ao limpar cache DNS:\n{error}")
+            self.logger.log_error(f"Erro ao limpar cache DNS: {error}")
+            messagebox.showerror(
+                "Erro",
+                f"Erro ao limpar cache DNS:\n\n{error}\n\n"
+                "Possíveis soluções:\n"
+                "• Execute como Administrador\n"
+                "• Verifique sua conexão de rede\n"
+                "• Tente novamente em alguns minutos",
+            )
 
-        return self.run_command_async(full_command, success_callback, error_callback)
+        # Executar de forma assíncrona
+        def run():
+            try:
+                self.is_running = True
+                self.logger.log("Iniciando limpeza de cache DNS...")
+
+                success, output = execute_dns_cleanup()
+                self.is_running = False
+
+                if success:
+                    success_callback(output)
+                else:
+                    error_callback(output)
+
+            except Exception as e:
+                self.is_running = False
+                error_callback(str(e))
+
+        thread = threading.Thread(target=run, daemon=True)
+        thread.start()
+        return thread
 
     def fix_audio(self):
         """Reparar som - Exatamente como no .bat"""

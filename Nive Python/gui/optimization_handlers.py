@@ -12,6 +12,7 @@ try:
     from core.otimizar_edge import OtimizadorEdge
     from core.desabilitar_tweaks import DesabilitadorTweaks
     from core.disable_software import DisableSoftware
+    from core.desabilitar_servicos import DesabilitadorServicos  # Novo módulo
 except ImportError:
     print("Aviso: Módulos de otimização não encontrados na pasta core")
     AceleradorWindows = None
@@ -21,6 +22,7 @@ except ImportError:
     OtimizadorEdge = None
     DesabilitadorTweaks = None
     DisableSoftware = None
+    DesabilitadorServicos = None  # Novo módulo
 
 # Importar módulo de resultados
 from .optimization_results import OptimizationResults
@@ -105,15 +107,77 @@ class OptimizationHandlers:
         thread.start()
 
     def disable_windows_services(self):
-        """Desabilitar serviços do Windows"""
-        if self.parent.confirm_operation(
+        """Desabilitar serviços desnecessários do Windows usando o módulo DesabilitadorServicos"""
+        if not self.parent.confirm_operation(
             "Desabilitar Serviços do Windows",
-            "Esta operação irá desabilitar serviços desnecessários do Windows.\n\n"
-            "⚠️ Esta função é IRREVERSÍVEL sem um ponto de restauração!\n\n"
+            "Esta operação irá desabilitar serviços desnecessários do Windows:\n\n"
+            "• Telemetria e Diagnósticos (DiagTrack, DPS)\n"
+            "• Serviços de Grupo Doméstico\n"
+            "• Windows Search e Superfetch\n"
+            "• Serviços de Áudio desnecessários\n"
+            "• BitLocker e Smart Card\n"
+            "• Serviços de Telefonia e Bluetooth\n"
+            "• Registro Remoto e Acesso Remoto\n"
+            "• Serviços NVIDIA de Telemetria\n"
+            "• E muitos outros serviços raramente usados...\n\n"
+            "⚠️ Esta função é IRREVERSÍVEL sem um ponto de restauração!\n"
             "⚠️ Execute como Administrador para melhores resultados!\n\n"
             "Deseja continuar?",
         ):
-            self._execute_optimization("disable_services")
+            return
+
+        # Verificar se o módulo está disponível
+        if DesabilitadorServicos is None:
+            messagebox.showerror(
+                "Erro",
+                "Módulo de desabilitação de serviços não encontrado!\n\n"
+                "Verifique se o arquivo 'core/desabilitar_servicos.py' existe.",
+            )
+            return
+
+        # Criar janela de progresso
+        progress_window, status_label, progress_bar, log_text = (
+            self.parent.ui.show_progress_dialog("Desabilitando Serviços do Windows")
+        )
+
+        def run_services_disable():
+            """Executar desabilitação de serviços em thread separada"""
+            try:
+                progress_logger = self._create_progress_logger(log_text)
+                desabilitador = DesabilitadorServicos(logger=progress_logger)
+
+                # Atualizar status
+                status_label.after(
+                    0, lambda: status_label.config(text="Desabilitando serviços...")
+                )
+
+                # Executar desabilitação
+                success, sucessos, erros = (
+                    desabilitador.executar_desabilitacao_servicos()
+                )
+
+                # Mostrar resultado final
+                def show_result():
+                    progress_bar.stop()
+                    self.results.show_services_result(
+                        progress_window, status_label, success, sucessos, erros
+                    )
+
+                # Agendar para thread principal
+                progress_window.after(500, show_result)
+
+            except Exception as e:
+                self._handle_error(
+                    progress_window,
+                    progress_bar,
+                    status_label,
+                    e,
+                    "desabilitação de serviços",
+                )
+
+        # Executar em thread separada para não travar a interface
+        thread = threading.Thread(target=run_services_disable, daemon=True)
+        thread.start()
 
     def disable_windows_software(self):
         """Desabilitar softwares do Windows"""

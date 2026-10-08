@@ -173,9 +173,14 @@ goto menu
 cls
 netsh winsock reset
 netsh int ip reset
+nbtstat -R
+nbtstat -RR
+arp -d *
+net stop dnscache
+ipconfig /flushdns 
+net start dnscache
 ipconfig /release 
 ipconfig /renew 
-ipconfig /flushdns 
 ipconfig /registerdns
 pause
 goto menu

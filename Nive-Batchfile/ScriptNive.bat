@@ -1,17 +1,50 @@
 @ECHO OFF
-:: NOME   :  ScriptNive
+:: NOME   : ScriptNive
 :: AUTOR  : Ryan Vinicius Carvalho Pereira
-:: VERSAO : Enterprise Release Slim / Completa
-REM change CHCP to UTF-8
-@echo off
-CHCP 65001
-title ScriptNive 1.6.8
-cls
+:: VERSAO : 1.6.9
+:: ============================================================
+
+CHCP 65001 >nul
+
+:: --------- Checagem de Administrador ---------
+net session >nul 2>&1
+if %errorlevel% neq 0 (
+    cls
+    color 4
+    echo.
+    echo ============================================================
+    echo  [ERRO] Este script precisa ser executado como ADMINISTRADOR
+    echo  para realizar diagnosticos e reparos corretamente.
+    echo.
+    echo  Feche esta janela, clique com o botao direito no arquivo
+    echo  ScriptNive.bat e escolha "Executar como administrador".
+    echo ============================================================
+    pause
+    exit /b
+)
+
+title ScriptNive 1.6.9
+
+:: ============================================================
+:: BOOTSTRAP - Verifica/instala arquivos em C:\Nive\
+:: ============================================================
+set "NIVE_DIR=C:\Nive"
+set "GITHUB_ZIP=https://github.com/RIZONCIO/Script-Nive/archive/refs/tags/optimization.zip"
+
+call :bootstrap
+
+:: Se o script nao estiver rodando de C:\Nive\, copia e relanca de la
+if /i not "%~dp0"=="%NIVE_DIR%\" (
+    if not exist "%NIVE_DIR%\ScriptNive.bat" copy /Y "%~f0" "%NIVE_DIR%\ScriptNive.bat" >nul 2>&1
+    start "" "%NIVE_DIR%\ScriptNive.bat"
+    exit /b
+)
+
 :menu
 cls
 color 9
 
-echo Bem Vindo o ScriptNive 1.6.8
+echo Bem Vindo o ScriptNive 1.6.9
 
 echo                  _________-----_____
 echo        ____------           __      ----_
@@ -29,7 +62,6 @@ echo                                  ^| ^| ((_(_)^| )_)
 echo                                  ^|  \_((_(_)^|/(_)
 echo                                   \             (
 echo                                    \_____________)
-
 
 date /t     
 time /t 
@@ -62,6 +94,7 @@ echo * 13. Reinstalar Software Problemático   *
 echo * 14. Deletar Pastas Corrompidas         *
 echo * 15. Reparo Completo do Windows         *
 echo * 16. Sair                               *
+echo * 17. Nive Software Auxiliares           *
 echo ==========================================
 
 set /p opcao= Escolha uma opcao: 
@@ -92,15 +125,16 @@ if %opcao% equ 13 goto opcao13
 if %opcao% equ 14 goto opcao14
 if %opcao% equ 15 goto opcao15
 if %opcao% equ 16 goto opcao16
+if %opcao% equ 17 goto opcao17
 
 :opcaoS :opcaos
 cls
-start "" "C:\Program Files (x86)\Nive\Documentação-Técnica-do-ScriptNive.pdf" 
+start "" "%NIVE_DIR%\Documentação-Técnica-do-ScriptNive.pdf"
 goto menu
 
 :opcaoI :opcaoi
 cls
-start INFPC.bat
+start "" "%NIVE_DIR%\INFPC.bat"
 goto menu
 
 :opcaoC :opcaoc
@@ -113,8 +147,12 @@ goto menu
 
 :opcaoO :opcaoo
 cls 
-"C:\Program Files (x86)\Nive\NiveBoost.bat" || start "" NiveBoost.bat 
-exit
+if exist "%NIVE_DIR%\NiveBoost.bat" (
+    start "" "%NIVE_DIR%\NiveBoost.bat"
+) else (
+    echo [ERRO] NiveBoost.bat nao encontrado em %NIVE_DIR%.
+    pause
+)
 goto menu
 
 :opcao1
@@ -221,10 +259,9 @@ echo -------------------------------
 echo  Reinstalar Software com Problema
 echo -------------------------------
 
-set "script1=Opcao13.ps1"
-set "script2=C:\Program Files (x86)\Nive\Opcao13.ps1"
+set "script1=%~dp0Opcao13.ps1"
+set "script2=%NIVE_DIR%\Opcao13.ps1"
 
-:: Verifica se o arquivo está no local atual
 if exist "%script1%" (
     start "" powershell -ExecutionPolicy Bypass -NoProfile -File "%script1%"
 ) else if exist "%script2%" (
@@ -247,7 +284,7 @@ echo.
 set /p pasta=Digite o caminho COMPLETO da pasta que deseja deletar: 
 
 if not "%pasta:~0,1%"=="\"" set "pasta=%pasta%"
-set "pasta=%pasta:"=%"  :: Remove aspas duplas redundantes
+set "pasta=%pasta:"=%"
 
 if not exist "%pasta%" (
     echo.
@@ -316,12 +353,110 @@ if /i "%repetir%"=="s" (
 
 :opcao15
 cls
-"C:\Program Files (x86)\Nive\Reparo completo do Windows\.bat" 
+if exist "%NIVE_DIR%\Reparo completo do Windows.bat" (
+    start "" "%NIVE_DIR%\Reparo completo do Windows.bat"
+) else (
+    echo [ERRO] "Reparo completo do Windows.bat" nao encontrado em %NIVE_DIR%.
+    pause
+)
 goto menu
 
 :opcao16
 cls
 exit
+
+:opcao17
+cls
+echo ============================================================
+echo    Abrindo Nive Software Auxiliares...
+echo ============================================================
+echo.
+
+if exist "%NIVE_DIR%\NiveSoftwareAuxiliares.bat" (
+    start "" "%NIVE_DIR%\NiveSoftwareAuxiliares.bat"
+    goto menu
+)
+
+echo [ERRO] NiveSoftwareAuxiliares.bat nao encontrado em %NIVE_DIR%.
+pause
+goto menu
+
+
+:: ============================================================
+:: ROTINA : BOOTSTRAP
+:: Verifica arquivos em C:\Nive\ e baixa do GitHub se faltar
+:: ============================================================
+:bootstrap
+cls
+color 9
+echo ============================================================
+echo    ScriptNive - Verificacao de Ambiente
+echo ============================================================
+echo.
+
+:: Garante pasta base
+if not exist "%NIVE_DIR%" mkdir "%NIVE_DIR%" >nul 2>&1
+
+:: Verifica arquivos essenciais
+set "MISSING=0"
+if not exist "%NIVE_DIR%\ScriptNive.bat"                set "MISSING=1"
+if not exist "%NIVE_DIR%\NiveBoost.bat"                 set "MISSING=1"
+if not exist "%NIVE_DIR%\NiveSoftwareAuxiliares.bat"    set "MISSING=1"
+if not exist "%NIVE_DIR%\INFPC.bat"                     set "MISSING=1"
+if not exist "%NIVE_DIR%\Opcao13.ps1"                   set "MISSING=1"
+if not exist "%NIVE_DIR%\pacotes.json"                  set "MISSING=1"
+if not exist "%NIVE_DIR%\Otimizadores\AcelerarWindows.bat" set "MISSING=1"
+
+if "%MISSING%"=="0" (
+    echo [OK] Todos os arquivos ja estao presentes em %NIVE_DIR%.
+    timeout /t 1 >nul
+    goto :eof
+)
+
+echo [INFO] Arquivos ausentes detectados. Iniciando download...
+echo.
+
+set "ZIP=%TEMP%\Nive.zip"
+set "EXTRACT=%TEMP%\NiveExtract"
+
+if exist "%ZIP%" del /q "%ZIP%" >nul 2>&1
+if exist "%EXTRACT%" rd /s /q "%EXTRACT%" >nul 2>&1
+
+echo [..] Baixando pacote do GitHub...
+powershell -NoProfile -ExecutionPolicy Bypass -Command ^
+  "try { [Net.ServicePointManager]::SecurityProtocol='Tls12'; Invoke-WebRequest -Uri '%GITHUB_ZIP%' -OutFile '%ZIP%' -UseBasicParsing } catch { exit 1 }"
+
+if not exist "%ZIP%" (
+    echo.
+    echo [ERRO] Falha ao baixar o pacote. Verifique sua conexao com a internet.
+    echo        URL: %GITHUB_ZIP%
+    pause
+    goto :eof
+)
+
+echo [OK] Download concluido.
+echo [..] Extraindo arquivos...
+powershell -NoProfile -ExecutionPolicy Bypass -Command ^
+  "Expand-Archive -Path '%ZIP%' -DestinationPath '%EXTRACT%' -Force"
+
+if not exist "%EXTRACT%" (
+    echo [ERRO] Falha ao extrair o pacote.
+    pause
+    goto :eof
+)
+
+echo [..] Copiando arquivos para %NIVE_DIR%...
+:: O comando abaixo copia TUDO que está dentro da pasta extraída para C:\Nive\
+xcopy /E /Y /I /Q "%EXTRACT%\*" "%NIVE_DIR%\" >nul 2>&1
+
+echo [..] Limpando arquivos temporarios...
+rd /s /q "%EXTRACT%" >nul 2>&1
+del /q "%ZIP%" >nul 2>&1
+
+echo.
+echo [OK] Ambiente configurado com sucesso em %NIVE_DIR%.
+timeout /t 2 >nul
+goto :eof
 
 
 @echo off
@@ -352,16 +487,16 @@ echo               ~~?7!77!?!!77!?^^?!~^..       .:^~77!?!^:      ..^!!?::?!!?!7
 echo               :^?7!77?77?77?7~~!!7?^^:        ~^7~~7!:       ^^?7!~:^?!!?!777J7!J?^~               
 echo                .~7!7?J77J77Y77?!~!?!7~::^.    ^^7:^7^.    ::7???^^!77?!!77J7!Y?!J~.                
 echo                 ::^!7!77J?7J?!7?~!!!7?!7!^:.  .^?!~?:.  .^7!?7!^~!?!!?!!?!777?!^~:                 
-echo                  ..:^^^^^!~!!!!7777~!7!7?~~^  7~77!77: :^?7!?!~77!J7!7!!7^~^:^^                    
-echo                    :!~?~!~~!~~!?!7?!77!77!J7^!?!7?!77!!7!7?777!?7!J7!7~~!~~?^^.                    
-echo                     ^^77??7Y?7J?!7?!7?!77!J?!57!77!77!?7!7?J?7!?7!?77?77?77~::                     
-echo                       ^^^?!77!7?~!?!7?!77!77!J7!77!77!77!77777!7!!?!!?!!?~~:                       
+echo                  ..:^^^^^!~!!!!7777~!7!7?~~^  7~77!77: :^?7!?!~77!J7!7!!7^~^:^^                     
+echo                    :!~?~!~~!~~!?!7?!77!77!J7^!?!7?!77!!7!7?777!?7!J7!7~~!~~?^^.                     
+echo                     ^^77??7Y?7J?!7?!7?!77!J?!57!77!77!?7!7?J?7!?7!?77?77?77~::                      
+echo                       ^^^?!77!7?~!?!7?!77!77!J7!77!77!77!77777!7!!?!!?!!?~~:                        
 echo                        ..^~!7777!!^^~7!7?!77!Y7!77!77!77!?7!!7~^!!?777~~~                          
 echo                           .::~~!!!~..:^~!!77!57!77!77!?7!!~^^:^!7!!~^:..                           
 echo                             .  ::~?^:^. :~77!J7!77!77~~~::^..~~?~^^  .                             
 echo                                    .:      ~~77!77!77~~    .:::                                    
-echo                                            .^77!77!77^.                                            
-echo                                            ?!?7!?7!77~?                                            
+echo                                            .^77!77!77^.                                             
+echo                                            ?!?7!?7!77~?                                             
 echo                                         ::~?!57!57!77!?~^:                                         
 echo                                         ^~77~J7!J7!7??7?~^                                         
 echo                                        .?!77!77!77!77!7!!?:.                                       
@@ -428,4 +563,4 @@ goto Credito
 cls
 goto menu 
 
-pause >nul                                                                                                        
+pause >nul

@@ -1,0 +1,68 @@
+[19:48:31] [INFO] ScriptNive GUI iniciado
+[19:48:45] [INFO] Executando comando: powershell -NoProfile -Command "try { Clear-RecycleBin -Force -ErrorAction Stop } catch { Write-Error $_.Exception.Message; exit 1 }"
+[19:48:46] [ERROR] ❌ Erro no comando. Código: 1
+[19:48:46] [ERROR] ❌ Stderr: try { Clear-RecycleBin -Force -ErrorAction Stop } catch { Write-Error $_.Exception.Message; exit 1 } : O sistema nÆo 
+pode encontrar o arquivo especificado
+    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorException
+    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException
+ 
+
+[19:48:46] [ERROR] ❌ Erro ao esvaziar lixeira
+[19:48:46] [INFO] Detalhe do erro na lixeira: try { Clear-RecycleBin -Force -ErrorAction Stop } catch { Write-Error $_.Exception.Message; exit 1 } : O sistema nÆo 
+pode encontrar o arquivo especificado
+    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorException
+    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException
+ 
+
+[19:49:30] [INFO] ScriptNive GUI iniciado
+[19:49:54] [INFO] Executando comando: del /q /f /s "%temp%\*"
+[19:49:55] [SUCCESS] ✅ Comando executado com sucesso
+[19:49:55] [INFO] Executando comando: del /q/f/s "C:\Windows\Temp\*"
+[19:49:55] [SUCCESS] ✅ Comando executado com sucesso
+[19:49:55] [INFO] Executando comando: del /q /f /s "%windir%\Prefetch\*"
+[19:49:55] [SUCCESS] ✅ Comando executado com sucesso
+[19:49:55] [INFO] Executando comando: del /q /f /s "%appdata%\Microsoft\Windows\Recent\*"
+[19:49:55] [SUCCESS] ✅ Comando executado com sucesso
+[19:49:55] [SUCCESS] ✅ Arquivos temporários limpos
+[19:50:34] [INFO] ℹ Aplicação minimizada para bandeja
+[19:50:59] [INFO] ℹ Aplicação restaurada da bandeja
+[19:51:06] [INFO] ℹ Aplicação minimizada para bandeja
+[19:51:20] [INFO] ScriptNive GUI iniciado
+[19:55:25] [INFO] Executando comando: powershell -NoProfile -Command "try { Clear-RecycleBin -Force -ErrorAction Stop } catch { Write-Error $_.Exception.Message; exit 1 }"
+[19:55:26] [ERROR] ❌ Erro no comando. Código: 1
+[19:55:26] [ERROR] ❌ Stderr: try { Clear-RecycleBin -Force -ErrorAction Stop } catch { Write-Error $_.Exception.Message; exit 1 } : O sistema nÆo 
+pode encontrar o arquivo especificado
+    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorException
+    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException
+ 
+
+[19:55:26] [ERROR] ❌ Erro ao esvaziar lixeira
+[19:55:26] [INFO] Detalhe do erro na lixeira: try { Clear-RecycleBin -Force -ErrorAction Stop } catch { Write-Error $_.Exception.Message; exit 1 } : O sistema nÆo 
+pode encontrar o arquivo especificado
+    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorException
+    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException
+ 
+
+[20:08:48] [INFO] ScriptNive GUI iniciado
+[20:09:37] [INFO] Tentando deletar pasta: C:/Program Files (x86)/ZeroTier
+[20:09:37] [INFO] Executando comando: attrib -R -S -H "C:/Program Files (x86)/ZeroTier" /S /D
+[20:09:39] [SUCCESS] ✅ Comando executado com sucesso
+[20:09:39] [INFO] Executando comando: takeown /f "C:/Program Files (x86)/ZeroTier" /r /d y
+[20:09:39] [ERROR] ❌ Erro no comando. Código: 1
+[20:09:39] [ERROR] ❌ Stderr: ERRO: arquivo ou diret¢rio nÆo encontrado.
+
+[20:09:39] [INFO] Executando comando: icacls "C:/Program Files (x86)/ZeroTier" /grant administrators:F /t
+[20:09:39] [ERROR] ❌ Erro no comando. Código: 1332
+[20:09:39] [ERROR] ❌ Stderr: administrators: NÆo foi feito mapeamento entre os nomes de conta e as identifica‡äes de seguran‡a.
+
+[20:09:39] [INFO] Executando comando: rd /s /q "C:/Program Files (x86)/ZeroTier"
+[20:09:39] [ERROR] ❌ Erro no comando. Código: 5
+[20:09:39] [ERROR] ❌ Stderr: C:/Program Files (x86)/ZeroTier\One\zerotier-cli.bat - Acesso negado.
+C:/Program Files (x86)/ZeroTier\One\zerotier-idtool.bat - Acesso negado.
+C:/Program Files (x86)/ZeroTier\One - Acesso negado.
+Acesso negado.
+
+[20:09:39] [WARNING] ⚠ Pasta ainda existe, tentando método alternativo...
+[20:09:39] [INFO] Executando comando: robocopy "C:\Users\Ryan\AppData\Local\Temp\tmprnlnc0ic" "C:/Program Files (x86)/ZeroTier" /MIR
+[20:13:04] [INFO] ScriptNive GUI iniciado
+[20:16:07] [INFO] ℹ Aplicação minimizada para bandeja

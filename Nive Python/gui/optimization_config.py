@@ -8,7 +8,9 @@ class OptimizationConfig:
     VERSION = "1.1.0"
 
     # Mensagens padrão
-    RESTART_MESSAGE = "⚠️ IMPORTANTE: Reinicie o sistema para aplicar todas as mudanças!"
+    RESTART_MESSAGE = (
+        "⚠️ IMPORTANTE: Reinicie o sistema para aplicar todas as mudanças!"
+    )
     ADMIN_WARNING = "⚠️ Execute como Administrador para melhores resultados!"
     IRREVERSIBLE_WARNING = "⚠️ Esta função é IRREVERSÍVEL sem um ponto de restauração!"
 
@@ -162,7 +164,6 @@ class OptimizationConfig:
         },
     ]
 
-    # Texto de aviso principal
     WARNING_TEXT = """🔴 ATENÇÃO: Estas funções são IRREVERSÍVEIS a não ser que tenha criado um ponto de restauração!
 
 📋 RECOMENDAÇÕES OBRIGATÓRIAS:
